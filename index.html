@@ -111,61 +111,48 @@
 
     <section class="chart-section">
 
-      <h2>グラフ</h2>
+  <h2>グラフ</h2>
 
+  <div class="date-range">
 
-      <div class="date-range">
+    <!-- 開始日 -->
 
-        <!-- 開始日 -->
+    <div class="date-input">
 
-        <div class="date-input">
+      <label>開始日</label>
 
-          <label>開始日</label>
+      <div class="date-select-group">
 
-          <div class="date-select-group">
+        <select id="startYear"></select>
 
-            <select id="startYear">
-              <option value="">年</option>
-            </select>
+        <select id="startMonth"></select>
 
-            <select id="startMonth">
-              <option value="">月</option>
-            </select>
-
-            <select id="startDay">
-              <option value="">日</option>
-            </select>
-
-          </div>
-
-        </div>
-
-
-        <!-- 終了日 -->
-
-        <div class="date-input">
-
-          <label>終了日</label>
-
-          <div class="date-select-group">
-
-            <select id="endYear">
-              <option value="">年</option>
-            </select>
-
-            <select id="endMonth">
-              <option value="">月</option>
-            </select>
-
-            <select id="endDay">
-              <option value="">日</option>
-            </select>
-
-          </div>
-
-        </div>
+        <select id="startDay"></select>
 
       </div>
+
+    </div>
+
+
+    <!-- 終了日 -->
+
+    <div class="date-input">
+
+      <label>終了日</label>
+
+      <div class="date-select-group">
+
+        <select id="endYear"></select>
+
+        <select id="endMonth"></select>
+
+        <select id="endDay"></select>
+
+      </div>
+
+    </div>
+
+  </div>
 
 
       <button
