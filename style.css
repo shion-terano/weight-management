@@ -2,6 +2,7 @@
   box-sizing: border-box;
 }
 
+
 body {
   margin: 0;
   background: #f7f7f7;
@@ -9,11 +10,17 @@ body {
   font-family: "Yu Gothic", "YuGothic", sans-serif;
 }
 
+
 .container {
   width: min(100% - 32px, 800px);
   margin: 0 auto;
   padding: 32px 0;
 }
+
+
+/* ========================================
+   見出し
+======================================== */
 
 h1 {
   margin: 0 0 32px;
@@ -21,44 +28,16 @@ h1 {
   font-weight: 700;
 }
 
+
 h2 {
   margin: 0 0 16px;
   font-size: 20px;
 }
 
-.records-section {
-  background: #fff;
-  padding: 24px;
-  border-radius: 16px;
-}
 
-.record {
-  padding: 16px 0;
-  border-bottom: 1px solid #eee;
-}
-
-.record:last-child {
-  border-bottom: none;
-}
-
-.record-date {
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-
-.record-values {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.record-value {
-  font-size: 15px;
-}
-
-.record-value strong {
-  font-size: 18px;
-}
+/* ========================================
+   入力
+======================================== */
 
 .input-section {
   background: #fff;
@@ -67,15 +46,18 @@ h2 {
   border-radius: 16px;
 }
 
+
 .input-group {
   margin-bottom: 20px;
 }
+
 
 .input-group label {
   display: block;
   margin-bottom: 8px;
   font-weight: 700;
 }
+
 
 .input-group input {
   width: 100%;
@@ -86,19 +68,27 @@ h2 {
   font-family: inherit;
 }
 
+
 .input-with-unit {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
+
 .input-with-unit input {
   flex: 1;
 }
 
+
 .input-with-unit span {
   white-space: nowrap;
 }
+
+
+/* ========================================
+   ボタン
+======================================== */
 
 .button-area {
   display: flex;
@@ -106,6 +96,7 @@ h2 {
   gap: 10px;
   margin-top: 24px;
 }
+
 
 .button-area button {
   padding: 14px;
@@ -116,15 +107,18 @@ h2 {
   cursor: pointer;
 }
 
+
 #saveButton {
   background: #333;
   color: #fff;
 }
 
+
 #missedButton {
   background: #eee;
   color: #333;
 }
+
 
 #message {
   margin: 16px 0 0;
@@ -132,10 +126,10 @@ h2 {
   min-height: 1.5em;
 }
 
-.record-missed {
-  font-weight: 700;
-  padding: 8px 0;
-}
+
+/* ========================================
+   グラフ
+======================================== */
 
 .chart-section {
   background: #fff;
@@ -144,15 +138,21 @@ h2 {
   border-radius: 16px;
 }
 
+
+/* 日付範囲 */
+
 .date-range {
   display: flex;
   gap: 16px;
   margin-bottom: 20px;
 }
 
+
 .date-input {
   flex: 1;
+  min-width: 0;
 }
+
 
 .date-input label {
   display: block;
@@ -160,53 +160,51 @@ h2 {
   font-weight: 700;
 }
 
-.date-selects {
+
+/* 年・月・日 */
+
+.date-select-group {
   display: flex;
   gap: 6px;
+  width: 100%;
 }
 
-.date-selects select {
+
+.date-select-group select {
+  min-width: 0;
   padding: 10px 8px;
   border: 1px solid #ddd;
   border-radius: 8px;
+  background: #fff;
+  color: #333;
   font-size: 16px;
   font-family: inherit;
-  background: #fff;
-}
-
-.date-selects select:nth-child(1) {
-  flex: 1.4;
-}
-
-.date-selects select:nth-child(2) {
-  flex: 1;
-}
-
-.date-selects select:nth-child(3) {
-  flex: 1;
+  cursor: pointer;
 }
 
 
-/* スマホ */
-@media (max-width: 600px) {
+/* 年 */
 
-  .date-range {
-    flex-direction: column;
-    gap: 18px;
-  }
-
-  .date-selects {
-    gap: 6px;
-  }
-
-  .date-selects select {
-    width: 100%;
-    min-width: 0;
-    font-size: 16px;
-    padding: 11px 6px;
-  }
-
+.date-select-group select:nth-child(1) {
+  flex: 1.2;
 }
+
+
+/* 月 */
+
+.date-select-group select:nth-child(2) {
+  flex: 0.8;
+}
+
+
+/* 日 */
+
+.date-select-group select:nth-child(3) {
+  flex: 0.8;
+}
+
+
+/* グラフボタン */
 
 #chartButton {
   width: 100%;
@@ -220,31 +218,123 @@ h2 {
   cursor: pointer;
 }
 
+
+/* グラフ本体 */
+
 .chart-container {
+  position: relative;
   width: 100%;
-  height: 600%;
+  height: 600px;
+  margin-top: 24px;
 }
 
-@media (max-width: 500px) {
 
-  .chart-container {
-    height: 500px;
+#weightChart {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+
+/* ========================================
+   記録
+======================================== */
+
+.records-section {
+  background: #fff;
+  padding: 24px;
+  border-radius: 16px;
+}
+
+
+.record {
+  padding: 16px 0;
+  border-bottom: 1px solid #eee;
+}
+
+
+.record:last-child {
+  border-bottom: none;
+}
+
+
+.record-date {
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+
+.record-values {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+
+.record-value {
+  font-size: 15px;
+}
+
+
+.record-value strong {
+  font-size: 18px;
+}
+
+
+.record-missed {
+  font-weight: 700;
+  padding: 8px 0;
+}
+
+
+/* ========================================
+   スマホ
+======================================== */
+
+@media (max-width: 600px) {
+
+  .container {
+    width: min(100% - 20px, 800px);
+    padding: 20px 0;
   }
 
-}
 
-.date-selects {
-  display: flex;
-  gap: 8px;
-}
+  h1 {
+    font-size: 24px;
+    margin-bottom: 24px;
+  }
 
-.date-selects select {
-  flex: 1;
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background: #fff;
-  font-size: 16px;
-  font-family: inherit;
+
+  .input-section,
+  .chart-section,
+  .records-section {
+    padding: 18px;
+    border-radius: 14px;
+  }
+
+
+  /* 日付選択 */
+
+  .date-range {
+    flex-direction: column;
+    gap: 18px;
+  }
+
+
+  .date-select-group {
+    gap: 5px;
+  }
+
+
+  .date-select-group select {
+    padding: 11px 4px;
+    font-size: 15px;
+  }
+
+
+  /* グラフ */
+
+  .chart-container {
+    height: 600px;
+  }
+
 }
