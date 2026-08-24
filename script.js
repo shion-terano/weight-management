@@ -823,7 +823,8 @@ const bodyFats =
           responsive:
             true,
 
-
+          maintainAspectRatio:
+  false,
           // ★ null のところを線でつながない
           spanGaps:
             false,
