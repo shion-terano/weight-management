@@ -1,3 +1,4 @@
+```javascript
 const GAS_URL = "https://script.google.com/macros/s/AKfycbzerkaBq6IVdttxu2H2icHyipUsUa9kAUcY8dhx84w45iUuh1V1hynKPafapIz6CXjAuA/exec";
 
 
@@ -100,12 +101,8 @@ function loadRecords() {
       console.log(records);
 
 
-      // グラフ用に保存
-
       allRecords = records;
 
-
-      // 記録一覧を表示
 
       displayRecords(records);
 
@@ -168,8 +165,6 @@ function displayRecords(records) {
   recordList.innerHTML = "";
 
 
-  // 新しい日付順
-
   records.sort(
     (a, b) =>
       new Date(b["日付"]) -
@@ -215,10 +210,6 @@ function displayRecords(records) {
   });
 
 
-  // ========================================
-  // 年
-  // ========================================
-
   Object.keys(years)
     .sort((a, b) => b - a)
     .forEach(year => {
@@ -233,8 +224,6 @@ function displayRecords(records) {
       yearDetails.className =
         "year-group";
 
-
-      // 現在の年を開く
 
       if (
         year ===
@@ -263,10 +252,6 @@ function displayRecords(records) {
       );
 
 
-      // ======================================
-      // 月
-      // ======================================
-
       Object.keys(years[year])
         .sort((a, b) => b - a)
         .forEach(month => {
@@ -281,8 +266,6 @@ function displayRecords(records) {
           monthDetails.className =
             "month-group";
 
-
-          // 現在の月を開く
 
           if (
             year ===
@@ -314,10 +297,6 @@ function displayRecords(records) {
           );
 
 
-          // ==================================
-          // 各記録
-          // ==================================
-
           years[year][month]
             .forEach(record => {
 
@@ -338,10 +317,6 @@ function displayRecords(records) {
                 );
 
 
-              // --------------------------------
-              // 計測忘れ
-              // --------------------------------
-
               if (
                 record["状態"] ===
                 "計測忘れ"
@@ -361,10 +336,6 @@ function displayRecords(records) {
 
               }
 
-
-              // --------------------------------
-              // 通常記録
-              // --------------------------------
 
               else {
 
@@ -523,122 +494,6 @@ function formatDateForComparison(
 
 
 // ========================================
-// プルダウンから日付を取得
-// ========================================
-
-function getSelectedDate(
-  yearId,
-  monthId,
-  dayId
-) {
-
-  const year =
-    document.getElementById(
-      yearId
-    ).value;
-
-
-  const month =
-    String(
-      document.getElementById(
-        monthId
-      ).value
-    ).padStart(2, "0");
-
-
-  const day =
-    String(
-      document.getElementById(
-        dayId
-      ).value
-    ).padStart(2, "0");
-
-
-  return `${year}-${month}-${day}`;
-
-}
-
-
-// ========================================
-// 月に合わせて日数を変更
-// ========================================
-
-function updateDayOptions(
-  yearId,
-  monthId,
-  dayId
-) {
-
-  const year =
-    Number(
-      document.getElementById(
-        yearId
-      ).value
-    );
-
-
-  const month =
-    Number(
-      document.getElementById(
-        monthId
-      ).value
-    );
-
-
-  const daySelect =
-    document.getElementById(
-      dayId
-    );
-
-
-  const currentDay =
-    Number(
-      daySelect.value
-    );
-
-
-  // その月の最終日
-
-  const lastDay =
-    new Date(
-      year,
-      month,
-      0
-    ).getDate();
-
-
-  daySelect.innerHTML = "";
-
-
-  for (
-    let day = 1;
-    day <= lastDay;
-    day++
-  ) {
-
-    daySelect.add(
-      new Option(
-        `${day}日`,
-        day
-      )
-    );
-
-  }
-
-
-  // 選択していた日を維持
-  // 存在しなければ月末日にする
-
-  daySelect.value =
-    Math.min(
-      currentDay || 1,
-      lastDay
-    );
-
-}
-
-
-// ========================================
 // 年・月・日プルダウン
 // ========================================
 
@@ -647,228 +502,322 @@ function setupDateSelectors() {
   const currentDate =
     new Date();
 
-
   const currentYear =
     currentDate.getFullYear();
 
-
   const currentMonth =
     currentDate.getMonth() + 1;
-
 
   const currentDay =
     currentDate.getDate();
 
 
-  const startYear =
-    document.getElementById(
-      "startYear"
+  // ----------------------------------------
+  // 元の date input を取得
+  // ----------------------------------------
+
+  const originalStart =
+    document.getElementById("startDate");
+
+  const originalEnd =
+    document.getElementById("endDate");
+
+
+  if (!originalStart || !originalEnd) {
+
+    console.error(
+      "startDate または endDate が見つかりません。"
     );
 
+    return;
 
-  const startMonth =
-    document.getElementById(
-      "startMonth"
-    );
+  }
 
 
-  const startDay =
-    document.getElementById(
-      "startDay"
-    );
+  // ----------------------------------------
+  // すでに作成済みなら何もしない
+  // ----------------------------------------
 
-
-  const endYear =
-    document.getElementById(
-      "endYear"
-    );
-
-
-  const endMonth =
-    document.getElementById(
-      "endMonth"
-    );
-
-
-  const endDay =
-    document.getElementById(
-      "endDay"
-    );
-
-
-  // ========================================
-  // 年
-  // ========================================
-
-  for (
-    let year = currentYear;
-    year >= currentYear - 10;
-    year--
+  if (
+    document.getElementById("startYear") ||
+    document.getElementById("endYear")
   ) {
 
-    startYear.add(
-      new Option(
-        `${year}年`,
-        year
-      )
+    return;
+
+  }
+
+
+  // ----------------------------------------
+  // 年・月・日UIを作る関数
+  // ----------------------------------------
+
+  function createSelectorGroup(
+    originalInput,
+    prefix,
+    defaultYear,
+    defaultMonth,
+    defaultDay
+  ) {
+
+    const wrapper =
+      document.createElement("div");
+
+    wrapper.className =
+      "date-selector-group";
+
+
+    // ======================================
+    // 年
+    // ======================================
+
+    const yearSelect =
+      document.createElement("select");
+
+    yearSelect.id =
+      prefix + "Year";
+
+
+    for (
+      let year = currentYear;
+      year >= currentYear - 10;
+      year--
+    ) {
+
+      const option =
+        document.createElement("option");
+
+      option.value =
+        year;
+
+      option.textContent =
+        `${year}年`;
+
+      yearSelect.appendChild(
+        option
+      );
+
+    }
+
+
+    // ======================================
+    // 月
+    // ======================================
+
+    const monthSelect =
+      document.createElement("select");
+
+    monthSelect.id =
+      prefix + "Month";
+
+
+    for (
+      let month = 1;
+      month <= 12;
+      month++
+    ) {
+
+      const option =
+        document.createElement("option");
+
+      option.value =
+        month;
+
+      option.textContent =
+        `${month}月`;
+
+      monthSelect.appendChild(
+        option
+      );
+
+    }
+
+
+    // ======================================
+    // 日
+    // ======================================
+
+    const daySelect =
+      document.createElement("select");
+
+    daySelect.id =
+      prefix + "Day";
+
+
+    for (
+      let day = 1;
+      day <= 31;
+      day++
+    ) {
+
+      const option =
+        document.createElement("option");
+
+      option.value =
+        day;
+
+      option.textContent =
+        `${day}日`;
+
+      daySelect.appendChild(
+        option
+      );
+
+    }
+
+
+    // ======================================
+    // 非表示の日付入力
+    // ======================================
+
+    const hiddenInput =
+      document.createElement("input");
+
+    hiddenInput.type =
+      "hidden";
+
+    hiddenInput.id =
+      prefix === "start"
+        ? "startDate"
+        : "endDate";
+
+
+    // ======================================
+    // 日付を更新
+    // ======================================
+
+    function updateDate() {
+
+      const year =
+        Number(yearSelect.value);
+
+      const month =
+        Number(monthSelect.value);
+
+      let day =
+        Number(daySelect.value);
+
+
+      // 月末を超えた日を自動調整
+      const maxDay =
+        new Date(
+          year,
+          month,
+          0
+        ).getDate();
+
+
+      if (day > maxDay) {
+
+        day =
+          maxDay;
+
+        daySelect.value =
+          day;
+
+      }
+
+
+      const formattedMonth =
+        String(month)
+          .padStart(2, "0");
+
+      const formattedDay =
+        String(day)
+          .padStart(2, "0");
+
+
+      hiddenInput.value =
+        `${year}-${formattedMonth}-${formattedDay}`;
+
+    }
+
+
+    yearSelect.addEventListener(
+      "change",
+      updateDate
+    );
+
+    monthSelect.addEventListener(
+      "change",
+      updateDate
+    );
+
+    daySelect.addEventListener(
+      "change",
+      updateDate
     );
 
 
-    endYear.add(
-      new Option(
-        `${year}年`,
-        year
-      )
+    // ======================================
+    // 初期値
+    // ======================================
+
+    yearSelect.value =
+      defaultYear;
+
+    monthSelect.value =
+      defaultMonth;
+
+    daySelect.value =
+      defaultDay;
+
+
+    updateDate();
+
+
+    // ======================================
+    // 表示
+    // ======================================
+
+    wrapper.appendChild(
+      yearSelect
+    );
+
+    wrapper.appendChild(
+      monthSelect
+    );
+
+    wrapper.appendChild(
+      daySelect
+    );
+
+    wrapper.appendChild(
+      hiddenInput
+    );
+
+
+    // 元の input を置き換える
+    originalInput.replaceWith(
+      wrapper
     );
 
   }
 
 
-  // ========================================
-  // 月
-  // ========================================
+  // ----------------------------------------
+  // 開始日
+  // ----------------------------------------
 
-  for (
-    let month = 1;
-    month <= 12;
-    month++
-  ) {
-
-    startMonth.add(
-      new Option(
-        `${month}月`,
-        month
-      )
-    );
-
-
-    endMonth.add(
-      new Option(
-        `${month}月`,
-        month
-      )
-    );
-
-  }
-
-
-  // ========================================
-  // 日
-  // ========================================
-
-  for (
-    let day = 1;
-    day <= 31;
-    day++
-  ) {
-
-    startDay.add(
-      new Option(
-        `${day}日`,
-        day
-      )
-    );
-
-
-    endDay.add(
-      new Option(
-        `${day}日`,
-        day
-      )
-    );
-
-  }
-
-
-  // ========================================
-  // 初期値
-  // ========================================
-
-  startYear.value =
-    currentYear;
-
-
-  startMonth.value =
-    currentMonth;
-
-
-  startDay.value =
-    1;
-
-
-  endYear.value =
-    currentYear;
-
-
-  endMonth.value =
-    currentMonth;
-
-
-  endDay.value =
-    currentDay;
-
-
-  // ========================================
-  // 開始日の年・月変更
-  // ========================================
-
-  startYear.addEventListener(
-    "change",
-    () => {
-
-      updateDayOptions(
-        "startYear",
-        "startMonth",
-        "startDay"
-      );
-
-    }
+  createSelectorGroup(
+    originalStart,
+    "start",
+    currentYear,
+    currentMonth,
+    currentDay
   );
 
 
-  startMonth.addEventListener(
-    "change",
-    () => {
+  // ----------------------------------------
+  // 終了日
+  // ----------------------------------------
 
-      updateDayOptions(
-        "startYear",
-        "startMonth",
-        "startDay"
-      );
-
-    }
-  );
-
-
-  // ========================================
-  // 終了日の年・月変更
-  // ========================================
-
-  endYear.addEventListener(
-    "change",
-    () => {
-
-      updateDayOptions(
-        "endYear",
-        "endMonth",
-        "endDay"
-      );
-
-    }
-  );
-
-
-  endMonth.addEventListener(
-    "change",
-    () => {
-
-      updateDayOptions(
-        "endYear",
-        "endMonth",
-        "endDay"
-      );
-
-    }
+  createSelectorGroup(
+    originalEnd,
+    "end",
+    currentYear,
+    currentMonth,
+    currentDay
   );
 
 }
@@ -885,24 +834,16 @@ function showCharts() {
   );
 
 
-  // ========================================
-  // 開始日・終了日
-  // ========================================
-
   const startDate =
-    getSelectedDate(
-      "startYear",
-      "startMonth",
-      "startDay"
-    );
+    document.getElementById(
+      "startDate"
+    ).value;
 
 
   const endDate =
-    getSelectedDate(
-      "endYear",
-      "endMonth",
-      "endDay"
-    );
+    document.getElementById(
+      "endDate"
+    ).value;
 
 
   // ========================================
@@ -943,7 +884,6 @@ function showCharts() {
           formatDateForComparison(
             record["日付"]
           );
-
 
         return (
           date >= startDate &&
@@ -990,7 +930,6 @@ function showCharts() {
 
   // ========================================
   // 体重
-  // 計測忘れ・0 → グラフには表示しない
   // ========================================
 
   const weights =
@@ -1031,7 +970,6 @@ function showCharts() {
 
   // ========================================
   // 体脂肪率
-  // 計測忘れ・0 → グラフには表示しない
   // ========================================
 
   const bodyFats =
@@ -1118,7 +1056,6 @@ function showCharts() {
           labels:
             labels,
 
-
           datasets: [
 
             // --------------------------------
@@ -1166,8 +1103,7 @@ function showCharts() {
               fill:
                 false,
 
-              // ○を消す
-
+              // 丸い点を完全に非表示
               pointRadius:
                 0,
 
@@ -1189,14 +1125,9 @@ function showCharts() {
           responsive:
             true,
 
-
-          // CSSの高さを使用
-
+          // CSS側の高さをそのまま使用
           maintainAspectRatio:
             false,
-
-
-          // nullのところを線でつながない
 
           spanGaps:
             false,
@@ -1614,3 +1545,4 @@ setupDateSelectors();
 displayTodayDate();
 
 loadRecords();
+```
