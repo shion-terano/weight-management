@@ -15,13 +15,20 @@
 
     <h1>体重管理</h1>
 
+    <!-- ========================================
+         入力
+    ========================================= -->
+
     <section class="input-section">
 
       <h2 id="todayDate"></h2>
 
       <div class="input-group">
+
         <label for="weight">体重</label>
+
         <div class="input-with-unit">
+
           <input
             type="number"
             id="weight"
@@ -29,12 +36,18 @@
             inputmode="decimal"
             placeholder="62.4"
           >
+
           <span>kg</span>
+
         </div>
+
       </div>
 
+
       <div class="input-group">
+
         <label for="bmi">BMI</label>
+
         <input
           type="number"
           id="bmi"
@@ -42,11 +55,16 @@
           inputmode="decimal"
           placeholder="19.8"
         >
+
       </div>
 
+
       <div class="input-group">
+
         <label for="bodyFat">体脂肪率</label>
+
         <div class="input-with-unit">
+
           <input
             type="number"
             id="bodyFat"
@@ -54,72 +72,82 @@
             inputmode="decimal"
             placeholder="13.7"
           >
+
           <span>%</span>
+
         </div>
+
       </div>
+
 
       <div class="button-area">
 
-        <button id="saveButton" type="button">
+        <button
+          id="saveButton"
+          type="button"
+        >
           記録する
         </button>
 
-        <button id="missedButton" type="button">
+
+        <button
+          id="missedButton"
+          type="button"
+        >
           今日は計測忘れ
         </button>
 
       </div>
+
 
       <p id="message"></p>
 
     </section>
 
 
+    <!-- ========================================
+         グラフ
+    ========================================= -->
+
     <section class="chart-section">
 
       <h2>グラフ</h2>
 
+
       <div class="date-range">
 
-  <!-- 開始日 -->
-  <div class="date-input">
+        <!-- 開始日 -->
 
-    <label>開始日</label>
+        <div class="date-input">
 
-    <div class="date-selects">
+          <label>開始日</label>
 
-      <select id="startYear"></select>
-      <select id="startMonth"></select>
-      <select id="startDay"></select>
+          <div class="date-select-group">
 
-    </div>
+            <select id="startYear">
+              <option value="">年</option>
+            </select>
 
-  </div>
+            <select id="startMonth">
+              <option value="">月</option>
+            </select>
+
+            <select id="startDay">
+              <option value="">日</option>
+            </select>
+
+          </div>
+
+        </div>
 
 
-  <!-- 終了日 -->
-  <div class="date-input">
-
-    <label>終了日</label>
-
-    <div class="date-selects">
-
-      <select id="endYear"></select>
-      <select id="endMonth"></select>
-      <select id="endDay"></select>
-
-    </div>
-
-  </div>
-
-</div>
-
+        <!-- 終了日 -->
 
         <div class="date-input">
 
           <label>終了日</label>
 
-          <div class="date-selects">
+          <div class="date-select-group">
 
             <select id="endYear">
               <option value="">年</option>
@@ -127,6 +155,10 @@
 
             <select id="endMonth">
               <option value="">月</option>
+            </select>
+
+            <select id="endDay">
+              <option value="">日</option>
             </select>
 
           </div>
@@ -145,11 +177,17 @@
 
 
       <div class="chart-container">
+
         <canvas id="weightChart"></canvas>
+
       </div>
 
     </section>
 
+
+    <!-- ========================================
+         記録
+    ========================================= -->
 
     <section class="records-section">
 
