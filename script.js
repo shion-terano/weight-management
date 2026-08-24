@@ -72,6 +72,189 @@ function displayTodayDate() {
 
 
 // ========================================
+// 年・月プルダウン
+// ========================================
+
+function setupDateSelectors() {
+
+  const currentYear =
+    new Date().getFullYear();
+
+
+  const startYear =
+    document.getElementById("startYear");
+
+  const endYear =
+    document.getElementById("endYear");
+
+  const startMonth =
+    document.getElementById("startMonth");
+
+  const endMonth =
+    document.getElementById("endMonth");
+
+
+  // ========================================
+  // 年
+  // ========================================
+
+  for (
+    let year = currentYear;
+    year >= currentYear - 10;
+    year--
+  ) {
+
+    const startOption =
+      document.createElement("option");
+
+    startOption.value =
+      year;
+
+    startOption.textContent =
+      `${year}年`;
+
+    startYear.appendChild(
+      startOption
+    );
+
+
+    const endOption =
+      document.createElement("option");
+
+    endOption.value =
+      year;
+
+    endOption.textContent =
+      `${year}年`;
+
+    endYear.appendChild(
+      endOption
+    );
+
+  }
+
+
+  // ========================================
+  // 月
+  // ========================================
+
+  for (
+    let month = 1;
+    month <= 12;
+    month++
+  ) {
+
+    const startOption =
+      document.createElement("option");
+
+    startOption.value =
+      String(month).padStart(2, "0");
+
+    startOption.textContent =
+      `${month}月`;
+
+    startMonth.appendChild(
+      startOption
+    );
+
+
+    const endOption =
+      document.createElement("option");
+
+    endOption.value =
+      String(month).padStart(2, "0");
+
+    endOption.textContent =
+      `${month}月`;
+
+    endMonth.appendChild(
+      endOption
+    );
+
+  }
+
+
+  // ========================================
+  // 初期値
+  // ========================================
+
+  const currentMonth =
+    String(
+      new Date().getMonth() + 1
+    ).padStart(2, "0");
+
+
+  startYear.value =
+    currentYear;
+
+  startMonth.value =
+    currentMonth;
+
+
+  endYear.value =
+    currentYear;
+
+  endMonth.value =
+    currentMonth;
+
+}
+
+
+// ========================================
+// プルダウンから日付を作る
+// ========================================
+
+function getSelectedDate(
+  yearId,
+  monthId,
+  isEndDate
+) {
+
+  const year =
+    document.getElementById(
+      yearId
+    ).value;
+
+  const month =
+    document.getElementById(
+      monthId
+    ).value;
+
+
+  if (!year || !month) {
+
+    return "";
+
+  }
+
+
+  // ----------------------------------------
+  // 開始日は月初
+  // 終了日は月末
+  // ----------------------------------------
+
+  if (isEndDate) {
+
+    const lastDay =
+      new Date(
+        Number(year),
+        Number(month),
+        0
+      ).getDate();
+
+    return (
+      `${year}-${month}-${String(lastDay).padStart(2, "0")}`
+    );
+
+  }
+
+
+  return `${year}-${month}-01`;
+
+}
+
+
+// ========================================
 // GASからデータを取得
 // ========================================
 
@@ -100,12 +283,8 @@ function loadRecords() {
       console.log(records);
 
 
-      // グラフ用に保存
-
       allRecords = records;
 
-
-      // 記録一覧を表示
 
       displayRecords(records);
 
@@ -168,8 +347,6 @@ function displayRecords(records) {
   recordList.innerHTML = "";
 
 
-  // 新しい日付順
-
   records.sort(
     (a, b) =>
       new Date(b["日付"]) -
@@ -215,14 +392,9 @@ function displayRecords(records) {
   });
 
 
-  // ========================================
-  // 年
-  // ========================================
-
   Object.keys(years)
     .sort((a, b) => b - a)
     .forEach(year => {
-
 
       const yearDetails =
         document.createElement(
@@ -233,8 +405,6 @@ function displayRecords(records) {
       yearDetails.className =
         "year-group";
 
-
-      // 現在の年を開く
 
       if (
         year ===
@@ -263,14 +433,9 @@ function displayRecords(records) {
       );
 
 
-      // ======================================
-      // 月
-      // ======================================
-
       Object.keys(years[year])
         .sort((a, b) => b - a)
         .forEach(month => {
-
 
           const monthDetails =
             document.createElement(
@@ -281,8 +446,6 @@ function displayRecords(records) {
           monthDetails.className =
             "month-group";
 
-
-          // 現在の月を開く
 
           if (
             year ===
@@ -314,13 +477,8 @@ function displayRecords(records) {
           );
 
 
-          // ==================================
-          // 各記録
-          // ==================================
-
           years[year][month]
             .forEach(record => {
-
 
               const div =
                 document.createElement(
@@ -337,10 +495,6 @@ function displayRecords(records) {
                   record["日付"]
                 );
 
-
-              // --------------------------------
-              // 計測忘れ
-              // --------------------------------
 
               if (
                 record["状態"] ===
@@ -361,11 +515,6 @@ function displayRecords(records) {
 
               }
 
-
-              // --------------------------------
-              // 通常記録
-              // --------------------------------
-
               else {
 
                 div.innerHTML = `
@@ -379,42 +528,42 @@ function displayRecords(records) {
                     <div class="record-value">
                       体重
                       <strong>
-  ${
-    record["体重"] !== null &&
-    record["体重"] !== "" &&
-    record["体重"] !== undefined
-      ? Number(record["体重"]).toFixed(1)
-      : "—"
-  }
-</strong>
-kg
+                        ${
+                          record["体重"] !== null &&
+                          record["体重"] !== "" &&
+                          record["体重"] !== undefined
+                            ? Number(record["体重"]).toFixed(1)
+                            : "—"
+                        }
+                      </strong>
+                      kg
                     </div>
 
                     <div class="record-value">
                       BMI
                       <strong>
-  ${
-    record["BMI"] !== null &&
-    record["BMI"] !== "" &&
-    record["BMI"] !== undefined
-      ? Number(record["BMI"]).toFixed(1)
-      : "—"
-  }
-</strong>
+                        ${
+                          record["BMI"] !== null &&
+                          record["BMI"] !== "" &&
+                          record["BMI"] !== undefined
+                            ? Number(record["BMI"]).toFixed(1)
+                            : "—"
+                        }
+                      </strong>
                     </div>
 
                     <div class="record-value">
                       体脂肪率
                       <strong>
-  ${
-    record["体脂肪率"] !== null &&
-    record["体脂肪率"] !== "" &&
-    record["体脂肪率"] !== undefined
-      ? Number(record["体脂肪率"]).toFixed(1)
-      : "—"
-  }
-</strong>
-%
+                        ${
+                          record["体脂肪率"] !== null &&
+                          record["体脂肪率"] !== "" &&
+                          record["体脂肪率"] !== undefined
+                            ? Number(record["体脂肪率"]).toFixed(1)
+                            : "—"
+                        }
+                      </strong>
+                      %
                     </div>
 
                   </div>
@@ -528,7 +677,9 @@ function formatDateForComparison(
 
 function showCharts() {
 
-  console.log("グラフを表示します");
+  console.log(
+    "グラフを表示します"
+  );
 
 
   // ========================================
@@ -536,17 +687,29 @@ function showCharts() {
   // ========================================
 
   const startDate =
-    document.getElementById("startDate").value;
+    getSelectedDate(
+      "startYear",
+      "startMonth",
+      false
+    );
+
 
   const endDate =
-    document.getElementById("endDate").value;
+    getSelectedDate(
+      "endYear",
+      "endMonth",
+      true
+    );
 
 
   // ========================================
   // 日付チェック
   // ========================================
 
-  if (!startDate || !endDate) {
+  if (
+    !startDate ||
+    !endDate
+  ) {
 
     alert(
       "開始日と終了日を指定してください。"
@@ -557,7 +720,9 @@ function showCharts() {
   }
 
 
-  if (startDate > endDate) {
+  if (
+    startDate > endDate
+  ) {
 
     alert(
       "開始日は終了日より前の日付にしてください。"
@@ -625,89 +790,83 @@ function showCharts() {
 
 
   // ========================================
-// 体重
-// 計測忘れ・0 → グラフには表示しない
-// ========================================
+  // 体重
+  // ========================================
 
-const weights =
-  filteredRecords.map(
-    record => {
+  const weights =
+    filteredRecords.map(
+      record => {
 
-      // 計測忘れ
-      if (
-        record["状態"] ===
-        "計測忘れ"
-      ) {
+        if (
+          record["状態"] ===
+          "計測忘れ"
+        ) {
 
-        return null;
+          return null;
+
+        }
+
+
+        const value =
+          Number(
+            record["体重"]
+          );
+
+
+        if (
+          !Number.isFinite(value) ||
+          value === 0
+        ) {
+
+          return null;
+
+        }
+
+
+        return value;
 
       }
-
-
-      const value =
-        Number(
-          record["体重"]
-        );
-
-
-      // 0 または不正な値
-      if (
-        !Number.isFinite(value) ||
-        value === 0
-      ) {
-
-        return null;
-
-      }
-
-
-      return value;
-
-    }
-  );
+    );
 
 
   // ========================================
-// 体脂肪率
-// 計測忘れ・0 → グラフには表示しない
-// ========================================
+  // 体脂肪率
+  // ========================================
 
-const bodyFats =
-  filteredRecords.map(
-    record => {
+  const bodyFats =
+    filteredRecords.map(
+      record => {
 
-      // 計測忘れ
-      if (
-        record["状態"] ===
-        "計測忘れ"
-      ) {
+        if (
+          record["状態"] ===
+          "計測忘れ"
+        ) {
 
-        return null;
+          return null;
+
+        }
+
+
+        const value =
+          Number(
+            record["体脂肪率"]
+          );
+
+
+        if (
+          !Number.isFinite(value) ||
+          value === 0
+        ) {
+
+          return null;
+
+        }
+
+
+        return value;
 
       }
-
-
-      const value =
-        Number(
-          record["体脂肪率"]
-        );
-
-
-      // 0 または不正な値
-      if (
-        !Number.isFinite(value) ||
-        value === 0
-      ) {
-
-        return null;
-
-      }
-
-
-      return value;
-
-    }
-  );
+    );
 
 
   // ========================================
@@ -760,9 +919,9 @@ const bodyFats =
 
           datasets: [
 
-            // --------------------------------
+            // ==================================
             // 体重
-            // --------------------------------
+            // ==================================
 
             {
 
@@ -781,9 +940,9 @@ const bodyFats =
             },
 
 
-            // --------------------------------
+            // ==================================
             // 体脂肪率
-            // --------------------------------
+            // ==================================
 
             {
 
@@ -805,6 +964,7 @@ const bodyFats =
               fill:
                 false,
 
+              // ○を表示しない
               pointRadius:
                 0,
 
@@ -823,9 +983,11 @@ const bodyFats =
           responsive:
             true,
 
+          // 縦方向をCSSに合わせる
           maintainAspectRatio:
-  false,
-          // ★ null のところを線でつながない
+            false,
+
+          // nullの部分を線でつながない
           spanGaps:
             false,
 
@@ -959,17 +1121,23 @@ function saveToGAS(
   const params =
     new URLSearchParams({
 
-      action: "save",
+      action:
+        "save",
 
-      date: date,
+      date:
+        date,
 
-      weight: weight,
+      weight:
+        weight,
 
-      bmi: bmi,
+      bmi:
+        bmi,
 
-      bodyFat: bodyFat,
+      bodyFat:
+        bodyFat,
 
-      status: status,
+      status:
+        status,
 
       callback:
         callbackName
@@ -988,7 +1156,8 @@ function saveToGAS(
 
       callback({
 
-        success: false,
+        success:
+          false,
 
         error:
           "GASへの接続に失敗しました。"
@@ -1071,7 +1240,6 @@ function saveMeasurement() {
     "計測済",
     function(result) {
 
-
       if (
         !result.success
       ) {
@@ -1095,7 +1263,9 @@ function saveMeasurement() {
         message.textContent =
           "今日の記録を更新しました。";
 
-      } else {
+      }
+
+      else {
 
         message.textContent =
           "記録しました。";
@@ -1152,7 +1322,6 @@ function saveMissedMeasurement() {
     "計測忘れ",
     function(result) {
 
-
       if (
         !result.success
       ) {
@@ -1176,7 +1345,9 @@ function saveMissedMeasurement() {
         message.textContent =
           "今日の記録を「計測忘れ」に更新しました。";
 
-      } else {
+      }
+
+      else {
 
         message.textContent =
           "計測忘れとして記録しました。";
@@ -1229,6 +1400,8 @@ document
 // ========================================
 // 起動
 // ========================================
+
+setupDateSelectors();
 
 displayTodayDate();
 
