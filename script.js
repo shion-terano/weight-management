@@ -415,7 +415,6 @@ kg
   }
 </strong>
 %
-                      %
                     </div>
 
                   </div>
