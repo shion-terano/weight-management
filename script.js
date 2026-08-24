@@ -1,4 +1,5 @@
-const GAS_URL = "https://script.google.com/macros/s/AKfycbzerkaBq6IVdttxu2H2icHyipUsUa9kAUcY8dhx84w45iUuh1V1hynKPafapIz6CXjAuA/exec";
+const GAS_URL =
+  "https://script.google.com/macros/s/AKfycbzerkaBq6IVdttxu2H2icHyipUsUa9kAUcY8dhx84w45iUuh1V1hynKPafapIz6CXjAuA/exec";
 
 
 // ========================================
@@ -72,453 +73,10 @@ function displayTodayDate() {
 
 
 // ========================================
-// GASからデータを取得
-// ========================================
-
-function loadRecords() {
-
-  console.log(
-    "loadRecords が実行されました"
-  );
-
-
-  const script =
-    document.createElement("script");
-
-
-  const callbackName =
-    "receiveWeightData_" + Date.now();
-
-
-  window[callbackName] =
-    function(records) {
-
-      console.log(
-        "GASからデータを受信しました"
-      );
-
-      console.log(records);
-
-
-      allRecords = records;
-
-      displayRecords(records);
-
-
-      delete window[callbackName];
-
-      script.remove();
-
-    };
-
-
-  script.src =
-    GAS_URL +
-    "?callback=" +
-    encodeURIComponent(
-      callbackName
-    );
-
-
-  script.onerror =
-    function() {
-
-      console.error(
-        "GASへの接続に失敗しました"
-      );
-
-
-      document.getElementById(
-        "recordList"
-      ).textContent =
-        "データを取得できませんでした。";
-
-
-      delete window[callbackName];
-
-      script.remove();
-
-    };
-
-
-  document.body.appendChild(
-    script
-  );
-
-}
-
-
-// ========================================
-// 記録一覧
-// ========================================
-
-function displayRecords(records) {
-
-  const recordList =
-    document.getElementById(
-      "recordList"
-    );
-
-
-  recordList.innerHTML = "";
-
-
-  records.sort(
-    (a, b) =>
-      new Date(b["日付"]) -
-      new Date(a["日付"])
-  );
-
-
-  const years = {};
-
-
-  records.forEach(record => {
-
-    const date =
-      new Date(record["日付"]);
-
-
-    const year =
-      date.getFullYear();
-
-
-    const month =
-      date.getMonth() + 1;
-
-
-    if (!years[year]) {
-
-      years[year] = {};
-
-    }
-
-
-    if (!years[year][month]) {
-
-      years[year][month] = [];
-
-    }
-
-
-    years[year][month].push(
-      record
-    );
-
-  });
-
-
-  Object.keys(years)
-    .sort((a, b) => b - a)
-    .forEach(year => {
-
-      const yearDetails =
-        document.createElement("details");
-
-
-      yearDetails.className =
-        "year-group";
-
-
-      if (
-        year ===
-        String(
-          new Date().getFullYear()
-        )
-      ) {
-
-        yearDetails.open = true;
-
-      }
-
-
-      const yearSummary =
-        document.createElement("summary");
-
-
-      yearSummary.textContent =
-        `${year}年`;
-
-
-      yearDetails.appendChild(
-        yearSummary
-      );
-
-
-      Object.keys(years[year])
-        .sort((a, b) => b - a)
-        .forEach(month => {
-
-          const monthDetails =
-            document.createElement("details");
-
-
-          monthDetails.className =
-            "month-group";
-
-
-          if (
-            year ===
-              String(
-                new Date().getFullYear()
-              )
-            &&
-            Number(month) ===
-              new Date().getMonth() + 1
-          ) {
-
-            monthDetails.open = true;
-
-          }
-
-
-          const monthSummary =
-            document.createElement("summary");
-
-
-          monthSummary.textContent =
-            `${month}月`;
-
-
-          monthDetails.appendChild(
-            monthSummary
-          );
-
-
-          years[year][month]
-            .forEach(record => {
-
-              const div =
-                document.createElement("div");
-
-
-              div.className =
-                "record";
-
-
-              const date =
-                formatDate(
-                  record["日付"]
-                );
-
-
-              if (
-                record["状態"] ===
-                "計測忘れ"
-              ) {
-
-                div.innerHTML = `
-
-                  <div class="record-date">
-                    ${date}
-                  </div>
-
-                  <div class="record-missed">
-                    計測忘れ
-                  </div>
-
-                `;
-
-              } else {
-
-                div.innerHTML = `
-
-                  <div class="record-date">
-                    ${date}
-                  </div>
-
-                  <div class="record-values">
-
-                    <div class="record-value">
-                      体重
-                      <strong>
-                        ${
-                          record["体重"] !== null &&
-                          record["体重"] !== "" &&
-                          record["体重"] !== undefined
-                            ? Number(record["体重"]).toFixed(1)
-                            : "—"
-                        }
-                      </strong>
-                      kg
-                    </div>
-
-                    <div class="record-value">
-                      BMI
-                      <strong>
-                        ${
-                          record["BMI"] !== null &&
-                          record["BMI"] !== "" &&
-                          record["BMI"] !== undefined
-                            ? Number(record["BMI"]).toFixed(1)
-                            : "—"
-                        }
-                      </strong>
-                    </div>
-
-                    <div class="record-value">
-                      体脂肪率
-                      <strong>
-                        ${
-                          record["体脂肪率"] !== null &&
-                          record["体脂肪率"] !== "" &&
-                          record["体脂肪率"] !== undefined
-                            ? Number(record["体脂肪率"]).toFixed(1)
-                            : "—"
-                        }
-                      </strong>
-                      %
-                    </div>
-
-                  </div>
-
-                `;
-
-              }
-
-
-              monthDetails.appendChild(
-                div
-              );
-
-            });
-
-
-          yearDetails.appendChild(
-            monthDetails
-          );
-
-        });
-
-
-      recordList.appendChild(
-        yearDetails
-      );
-
-    });
-
-}
-
-
-// ========================================
-// 日付表示
-// ========================================
-
-function formatDate(dateString) {
-
-  const date =
-    new Date(dateString);
-
-
-  const weekdays = [
-    "Sun.",
-    "Mon.",
-    "Tue.",
-    "Wed.",
-    "Thu.",
-    "Fri.",
-    "Sat."
-  ];
-
-
-  const year =
-    date.getFullYear();
-
-
-  const month =
-    String(
-      date.getMonth() + 1
-    ).padStart(2, "0");
-
-
-  const day =
-    String(
-      date.getDate()
-    ).padStart(2, "0");
-
-
-  return `${year}-${month}-${day} ${weekdays[date.getDay()]}`;
-
-}
-
-
-// ========================================
-// 比較用の日付
-// ========================================
-
-function formatDateForComparison(dateString) {
-
-  const date =
-    new Date(dateString);
-
-
-  const year =
-    date.getFullYear();
-
-
-  const month =
-    String(
-      date.getMonth() + 1
-    ).padStart(2, "0");
-
-
-  const day =
-    String(
-      date.getDate()
-    ).padStart(2, "0");
-
-
-  return `${year}-${month}-${day}`;
-
-}
-
-
-// ========================================
-// 年・月・日のプルダウン設定
+// 年・月・日プルダウン
 // ========================================
 
 function setupDateSelectors() {
-
-  const startYear =
-    document.getElementById("startYear");
-
-  const startMonth =
-    document.getElementById("startMonth");
-
-  const startDay =
-    document.getElementById("startDay");
-
-  const endYear =
-    document.getElementById("endYear");
-
-  const endMonth =
-    document.getElementById("endMonth");
-
-  const endDay =
-    document.getElementById("endDay");
-
-
-  // ----------------------------------------
-  // 必要な要素がない場合
-  // ----------------------------------------
-
-  if (
-    !startYear ||
-    !startMonth ||
-    !startDay ||
-    !endYear ||
-    !endMonth ||
-    !endDay
-  ) {
-
-    console.error(
-      "日付プルダウンの要素が見つかりません。"
-    );
-
-    return;
-
-  }
-
 
   const currentDate =
     new Date();
@@ -533,13 +91,29 @@ function setupDateSelectors() {
     currentDate.getDate();
 
 
-  // ----------------------------------------
+  const startYear =
+    document.getElementById("startYear");
+
+  const startMonth =
+    document.getElementById("startMonth");
+
+  const startDay =
+    document.getElementById("startDay");
+
+
+  const endYear =
+    document.getElementById("endYear");
+
+  const endMonth =
+    document.getElementById("endMonth");
+
+  const endDay =
+    document.getElementById("endDay");
+
+
+  // ========================================
   // 年
-  // ----------------------------------------
-
-  startYear.innerHTML = "";
-  endYear.innerHTML = "";
-
+  // ========================================
 
   for (
     let year = currentYear;
@@ -547,43 +121,26 @@ function setupDateSelectors() {
     year--
   ) {
 
-    const startOption =
-      document.createElement("option");
-
-    startOption.value =
-      year;
-
-    startOption.textContent =
-      `${year}年`;
-
     startYear.appendChild(
-      startOption
+      createOption(
+        year,
+        `${year}年`
+      )
     );
 
-
-    const endOption =
-      document.createElement("option");
-
-    endOption.value =
-      year;
-
-    endOption.textContent =
-      `${year}年`;
-
     endYear.appendChild(
-      endOption
+      createOption(
+        year,
+        `${year}年`
+      )
     );
 
   }
 
 
-  // ----------------------------------------
+  // ========================================
   // 月
-  // ----------------------------------------
-
-  startMonth.innerHTML = "";
-  endMonth.innerHTML = "";
-
+  // ========================================
 
   for (
     let month = 1;
@@ -591,57 +148,26 @@ function setupDateSelectors() {
     month++
   ) {
 
-    const startOption =
-      document.createElement("option");
-
-    startOption.value =
-      month;
-
-    startOption.textContent =
-      `${month}月`;
-
     startMonth.appendChild(
-      startOption
+      createOption(
+        month,
+        `${month}月`
+      )
     );
 
-
-    const endOption =
-      document.createElement("option");
-
-    endOption.value =
-      month;
-
-    endOption.textContent =
-      `${month}月`;
-
     endMonth.appendChild(
-      endOption
+      createOption(
+        month,
+        `${month}月`
+      )
     );
 
   }
 
 
-  // ----------------------------------------
-  // 初期値
-  // ----------------------------------------
-
-  startYear.value =
-    currentYear;
-
-  startMonth.value =
-    currentMonth;
-
-
-  endYear.value =
-    currentYear;
-
-  endMonth.value =
-    currentMonth;
-
-
-  // ----------------------------------------
-  // 日を設定
-  // ----------------------------------------
+  // ========================================
+  // 日
+  // ========================================
 
   updateDays(
     startYear,
@@ -649,7 +175,6 @@ function setupDateSelectors() {
     startDay,
     currentDay
   );
-
 
   updateDays(
     endYear,
@@ -659,9 +184,47 @@ function setupDateSelectors() {
   );
 
 
-  // ----------------------------------------
+  // ========================================
+  // 初期値
+  // ========================================
+
+  startYear.value =
+    String(currentYear);
+
+  startMonth.value =
+    String(currentMonth);
+
+  updateDays(
+    startYear,
+    startMonth,
+    startDay,
+    currentDay
+  );
+
+  startDay.value =
+    String(currentDay);
+
+
+  endYear.value =
+    String(currentYear);
+
+  endMonth.value =
+    String(currentMonth);
+
+  updateDays(
+    endYear,
+    endMonth,
+    endDay,
+    currentDay
+  );
+
+  endDay.value =
+    String(currentDay);
+
+
+  // ========================================
   // 年・月変更時
-  // ----------------------------------------
+  // ========================================
 
   startYear.addEventListener(
     "change",
@@ -722,14 +285,37 @@ function setupDateSelectors() {
 
 
 // ========================================
-// 日のプルダウンを更新
+// option作成
+// ========================================
+
+function createOption(
+  value,
+  text
+) {
+
+  const option =
+    document.createElement("option");
+
+  option.value =
+    String(value);
+
+  option.textContent =
+    text;
+
+  return option;
+
+}
+
+
+// ========================================
+// 日の更新
 // ========================================
 
 function updateDays(
   yearSelect,
   monthSelect,
   daySelect,
-  preferredDay
+  preferredDay = null
 ) {
 
   const year =
@@ -739,18 +325,23 @@ function updateDays(
     Number(monthSelect.value);
 
 
-  if (
-    !year ||
-    !month
-  ) {
+  if (!year || !month) {
+
+    daySelect.innerHTML =
+      '<option value="">日</option>';
 
     return;
 
   }
 
 
-  // その月の最終日
-  const lastDay =
+  const oldDay =
+    preferredDay !== null
+      ? Number(preferredDay)
+      : Number(daySelect.value);
+
+
+  const daysInMonth =
     new Date(
       year,
       month,
@@ -758,54 +349,52 @@ function updateDays(
     ).getDate();
 
 
-  const oldDay =
-    Number(daySelect.value);
+  daySelect.innerHTML =
+    "";
 
 
-  const targetDay =
-    preferredDay ||
-    oldDay ||
-    1;
+  const blankOption =
+    document.createElement("option");
 
+  blankOption.value =
+    "";
 
-  daySelect.innerHTML = "";
+  blankOption.textContent =
+    "日";
+
+  daySelect.appendChild(
+    blankOption
+  );
 
 
   for (
     let day = 1;
-    day <= lastDay;
+    day <= daysInMonth;
     day++
   ) {
 
-    const option =
-      document.createElement("option");
-
-    option.value =
-      day;
-
-    option.textContent =
-      `${day}日`;
-
     daySelect.appendChild(
-      option
+      createOption(
+        day,
+        `${day}日`
+      )
     );
 
   }
 
 
-  // 存在する日ならその日を選択
   if (
-    targetDay <= lastDay
+    oldDay >= 1 &&
+    oldDay <= daysInMonth
   ) {
 
     daySelect.value =
-      targetDay;
+      String(oldDay);
 
   } else {
 
-    // 例えば31日から2月に変更した場合
     daySelect.value =
-      lastDay;
+      String(daysInMonth);
 
   }
 
@@ -813,7 +402,7 @@ function updateDays(
 
 
 // ========================================
-// プルダウンから日付を作る
+// プルダウンから日付を取得
 // ========================================
 
 function getSelectedDate(
@@ -828,21 +417,506 @@ function getSelectedDate(
     ).value;
 
   const month =
-    String(
+    document.getElementById(
+      monthId
+    ).value;
+
+  const day =
+    document.getElementById(
+      dayId
+    ).value;
+
+
+  if (
+    !year ||
+    !month ||
+    !day
+  ) {
+
+    return "";
+
+  }
+
+
+  return (
+    `${year}-` +
+    `${String(month).padStart(2, "0")}-` +
+    `${String(day).padStart(2, "0")}`
+  );
+
+}
+
+
+// ========================================
+// GASからデータを取得
+// ========================================
+
+function loadRecords() {
+
+  console.log(
+    "loadRecords が実行されました"
+  );
+
+
+  const script =
+    document.createElement("script");
+
+
+  const callbackName =
+    "receiveWeightData_" +
+    Date.now();
+
+
+  window[callbackName] =
+    function(records) {
+
+      console.log(
+        "GASからデータを受信しました"
+      );
+
+      console.log(records);
+
+
+      allRecords =
+        records;
+
+
+      displayRecords(
+        records
+      );
+
+
+      delete window[callbackName];
+
+      script.remove();
+
+    };
+
+
+  script.src =
+    GAS_URL +
+    "?callback=" +
+    encodeURIComponent(
+      callbackName
+    );
+
+
+  script.onerror =
+    function() {
+
+      console.error(
+        "GASへの接続に失敗しました"
+      );
+
+
       document.getElementById(
-        monthId
-      ).value
-    ).padStart(2, "0");
+        "recordList"
+      ).textContent =
+        "データを取得できませんでした。";
+
+
+      delete window[callbackName];
+
+      script.remove();
+
+    };
+
+
+  document.body.appendChild(
+    script
+  );
+
+}
+
+
+// ========================================
+// 記録一覧
+// ========================================
+
+function displayRecords(
+  records
+) {
+
+  const recordList =
+    document.getElementById(
+      "recordList"
+    );
+
+
+  recordList.innerHTML =
+    "";
+
+
+  records.sort(
+    (a, b) =>
+      new Date(b["日付"]) -
+      new Date(a["日付"])
+  );
+
+
+  const years = {};
+
+
+  records.forEach(
+    record => {
+
+      const date =
+        new Date(
+          record["日付"]
+        );
+
+
+      const year =
+        date.getFullYear();
+
+      const month =
+        date.getMonth() + 1;
+
+
+      if (!years[year]) {
+
+        years[year] = {};
+
+      }
+
+
+      if (!years[year][month]) {
+
+        years[year][month] = [];
+
+      }
+
+
+      years[year][month].push(
+        record
+      );
+
+    }
+  );
+
+
+  Object.keys(years)
+    .sort(
+      (a, b) =>
+        b - a
+    )
+    .forEach(
+      year => {
+
+        const yearDetails =
+          document.createElement(
+            "details"
+          );
+
+
+        yearDetails.className =
+          "year-group";
+
+
+        if (
+          year ===
+          String(
+            new Date().getFullYear()
+          )
+        ) {
+
+          yearDetails.open =
+            true;
+
+        }
+
+
+        const yearSummary =
+          document.createElement(
+            "summary"
+          );
+
+
+        yearSummary.textContent =
+          `${year}年`;
+
+
+        yearDetails.appendChild(
+          yearSummary
+        );
+
+
+        Object.keys(
+          years[year]
+        )
+          .sort(
+            (a, b) =>
+              b - a
+          )
+          .forEach(
+            month => {
+
+              const monthDetails =
+                document.createElement(
+                  "details"
+                );
+
+
+              monthDetails.className =
+                "month-group";
+
+
+              if (
+                year ===
+                  String(
+                    new Date()
+                      .getFullYear()
+                  )
+                &&
+                Number(month) ===
+                  new Date()
+                    .getMonth() + 1
+              ) {
+
+                monthDetails.open =
+                  true;
+
+              }
+
+
+              const monthSummary =
+                document.createElement(
+                  "summary"
+                );
+
+
+              monthSummary.textContent =
+                `${month}月`;
+
+
+              monthDetails.appendChild(
+                monthSummary
+              );
+
+
+              years[year][month]
+                .forEach(
+                  record => {
+
+                    const div =
+                      document.createElement(
+                        "div"
+                      );
+
+
+                    div.className =
+                      "record";
+
+
+                    const date =
+                      formatDate(
+                        record["日付"]
+                      );
+
+
+                    if (
+                      record["状態"] ===
+                      "計測忘れ"
+                    ) {
+
+                      div.innerHTML = `
+
+                        <div class="record-date">
+                          ${date}
+                        </div>
+
+                        <div class="record-missed">
+                          計測忘れ
+                        </div>
+
+                      `;
+
+                    } else {
+
+                      div.innerHTML = `
+
+                        <div class="record-date">
+                          ${date}
+                        </div>
+
+                        <div class="record-values">
+
+                          <div class="record-value">
+                            体重
+                            <strong>
+                              ${
+                                record["体重"] !== null &&
+                                record["体重"] !== "" &&
+                                record["体重"] !== undefined
+                                  ? Number(
+                                      record["体重"]
+                                    ).toFixed(1)
+                                  : "—"
+                              }
+                            </strong>
+                            kg
+                          </div>
+
+
+                          <div class="record-value">
+                            BMI
+                            <strong>
+                              ${
+                                record["BMI"] !== null &&
+                                record["BMI"] !== "" &&
+                                record["BMI"] !== undefined
+                                  ? Number(
+                                      record["BMI"]
+                                    ).toFixed(1)
+                                  : "—"
+                              }
+                            </strong>
+                          </div>
+
+
+                          <div class="record-value">
+                            体脂肪率
+                            <strong>
+                              ${
+                                record["体脂肪率"] !== null &&
+                                record["体脂肪率"] !== "" &&
+                                record["体脂肪率"] !== undefined
+                                  ? Number(
+                                      record["体脂肪率"]
+                                    ).toFixed(1)
+                                  : "—"
+                              }
+                            </strong>
+                            %
+                          </div>
+
+                        </div>
+
+                      `;
+
+                    }
+
+
+                    monthDetails.appendChild(
+                      div
+                    );
+
+                  }
+                );
+
+
+              yearDetails.appendChild(
+                monthDetails
+              );
+
+            }
+          );
+
+
+        recordList.appendChild(
+          yearDetails
+        );
+
+      }
+    );
+
+}
+
+
+// ========================================
+// 日付表示
+// ========================================
+
+function formatDate(
+  dateString
+) {
+
+  const date =
+    new Date(
+      dateString
+    );
+
+
+  const weekdays = [
+    "Sun.",
+    "Mon.",
+    "Tue.",
+    "Wed.",
+    "Thu.",
+    "Fri.",
+    "Sat."
+  ];
+
+
+  const year =
+    date.getFullYear();
+
+
+  const month =
+    String(
+      date.getMonth() + 1
+    ).padStart(
+      2,
+      "0"
+    );
+
 
   const day =
     String(
-      document.getElementById(
-        dayId
-      ).value
-    ).padStart(2, "0");
+      date.getDate()
+    ).padStart(
+      2,
+      "0"
+    );
 
 
-  return `${year}-${month}-${day}`;
+  return (
+    `${year}-${month}-${day} ` +
+    `${weekdays[date.getDay()]}`
+  );
+
+}
+
+
+// ========================================
+// 比較用の日付
+// ========================================
+
+function formatDateForComparison(
+  dateString
+) {
+
+  const date =
+    new Date(
+      dateString
+    );
+
+
+  const year =
+    date.getFullYear();
+
+
+  const month =
+    String(
+      date.getMonth() + 1
+    ).padStart(
+      2,
+      "0"
+    );
+
+
+  const day =
+    String(
+      date.getDate()
+    ).padStart(
+      2,
+      "0"
+    );
+
+
+  return (
+    `${year}-${month}-${day}`
+  );
 
 }
 
@@ -859,7 +933,7 @@ function showCharts() {
 
 
   // ========================================
-  // 開始日・終了日
+  // 選択された日付
   // ========================================
 
   const startDate =
@@ -883,6 +957,20 @@ function showCharts() {
   // ========================================
 
   if (
+    !startDate ||
+    !endDate
+  ) {
+
+    alert(
+      "開始日と終了日を指定してください。"
+    );
+
+    return;
+
+  }
+
+
+  if (
     startDate > endDate
   ) {
 
@@ -901,19 +989,22 @@ function showCharts() {
 
   const filteredRecords =
     allRecords
-      .filter(record => {
+      .filter(
+        record => {
 
-        const date =
-          formatDateForComparison(
-            record["日付"]
+          const date =
+            formatDateForComparison(
+              record["日付"]
+            );
+
+
+          return (
+            date >= startDate &&
+            date <= endDate
           );
 
-        return (
-          date >= startDate &&
-          date <= endDate
-        );
-
-      })
+        }
+      )
       .sort(
         (a, b) =>
           new Date(a["日付"]) -
@@ -1032,14 +1123,15 @@ function showCharts() {
 
 
   // ========================================
-  // 既存グラフを削除
+  // 既存グラフ削除
   // ========================================
 
   if (weightChart) {
 
     weightChart.destroy();
 
-    weightChart = null;
+    weightChart =
+      null;
 
   }
 
@@ -1081,9 +1173,9 @@ function showCharts() {
 
           datasets: [
 
-            // --------------------------------
+            // ==================================
             // 体重
-            // --------------------------------
+            // ==================================
 
             {
 
@@ -1102,9 +1194,9 @@ function showCharts() {
             },
 
 
-            // --------------------------------
+            // ==================================
             // 体脂肪率
-            // --------------------------------
+            // ==================================
 
             {
 
@@ -1126,7 +1218,6 @@ function showCharts() {
               fill:
                 false,
 
-              // ○を消す
               pointRadius:
                 0,
 
@@ -1148,7 +1239,6 @@ function showCharts() {
           responsive:
             true,
 
-          // CSSの高さをそのまま使用
           maintainAspectRatio:
             false,
 
@@ -1267,13 +1357,17 @@ function saveToGAS(
 
 
   const callbackName =
-    "saveResult_" + Date.now();
+    "saveResult_" +
+    Date.now();
 
 
   window[callbackName] =
     function(result) {
 
-      callback(result);
+      callback(
+        result
+      );
+
 
       delete window[callbackName];
 
