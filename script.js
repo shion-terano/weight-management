@@ -806,7 +806,7 @@ const bodyFats =
                 false,
 
               pointRadius:
-                4,
+                0,
 
               spanGaps:
                 false
