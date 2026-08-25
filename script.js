@@ -10,6 +10,9 @@ let allRecords = [];
 
 let weightChart = null;
 
+// 過去の記録を編集している場合の日付
+let editingDate = null;
+
 
 // ========================================
 // 今日の日付
@@ -78,8 +81,7 @@ function displayTodayDate() {
 
 function setupDateSelectors() {
 
-  const currentDate =
-    new Date();
+  const currentDate = new Date();
 
   const currentYear =
     currentDate.getFullYear();
@@ -166,25 +168,6 @@ function setupDateSelectors() {
 
 
   // ========================================
-  // 日
-  // ========================================
-
-  updateDays(
-    startYear,
-    startMonth,
-    startDay,
-    currentDay
-  );
-
-  updateDays(
-    endYear,
-    endMonth,
-    endDay,
-    currentDay
-  );
-
-
-  // ========================================
   // 初期値
   // ========================================
 
@@ -201,9 +184,6 @@ function setupDateSelectors() {
     currentDay
   );
 
-  startDay.value =
-    String(currentDay);
-
 
   endYear.value =
     String(currentYear);
@@ -217,9 +197,6 @@ function setupDateSelectors() {
     endDay,
     currentDay
   );
-
-  endDay.value =
-    String(currentDay);
 
 
   // ========================================
@@ -309,6 +286,7 @@ function createOption(
 
 // ========================================
 // 日の更新
+// 「日」という空の選択肢は作らない
 // ========================================
 
 function updateDays(
@@ -327,8 +305,7 @@ function updateDays(
 
   if (!year || !month) {
 
-    daySelect.innerHTML =
-      '<option value="">日</option>';
+    daySelect.innerHTML = "";
 
     return;
 
@@ -349,22 +326,7 @@ function updateDays(
     ).getDate();
 
 
-  daySelect.innerHTML =
-    "";
-
-
-  const blankOption =
-    document.createElement("option");
-
-  blankOption.value =
-    "";
-
-  blankOption.textContent =
-    "日";
-
-  daySelect.appendChild(
-    blankOption
-  );
+  daySelect.innerHTML = "";
 
 
   for (
@@ -714,87 +676,161 @@ function displayRecords(
                       );
 
 
+                    const editDate =
+                      formatDateForComparison(
+                        record["日付"]
+                      );
+
+
+                    // ==================================
+                    // 記録本体
+                    // ==================================
+
+                    div.innerHTML = `
+
+                      <div class="record-date">
+                        ${date}
+                      </div>
+
+                    `;
+
+
+                    // ==================================
+                    // 計測忘れ
+                    // ==================================
+
                     if (
                       record["状態"] ===
                       "計測忘れ"
                     ) {
 
-                      div.innerHTML = `
+                      const missedDiv =
+                        document.createElement(
+                          "div"
+                        );
 
-                        <div class="record-date">
-                          ${date}
-                        </div>
+                      missedDiv.className =
+                        "record-missed";
 
-                        <div class="record-missed">
-                          計測忘れ
-                        </div>
+                      missedDiv.textContent =
+                        "計測忘れ";
 
-                      `;
-
-                    } else {
-
-                      div.innerHTML = `
-
-                        <div class="record-date">
-                          ${date}
-                        </div>
-
-                        <div class="record-values">
-
-                          <div class="record-value">
-                            体重
-                            <strong>
-                              ${
-                                record["体重"] !== null &&
-                                record["体重"] !== "" &&
-                                record["体重"] !== undefined
-                                  ? Number(
-                                      record["体重"]
-                                    ).toFixed(1)
-                                  : "—"
-                              }
-                            </strong>
-                            kg
-                          </div>
-
-
-                          <div class="record-value">
-                            BMI
-                            <strong>
-                              ${
-                                record["BMI"] !== null &&
-                                record["BMI"] !== "" &&
-                                record["BMI"] !== undefined
-                                  ? Number(
-                                      record["BMI"]
-                                    ).toFixed(1)
-                                  : "—"
-                              }
-                            </strong>
-                          </div>
-
-
-                          <div class="record-value">
-                            体脂肪率
-                            <strong>
-                              ${
-                                record["体脂肪率"] !== null &&
-                                record["体脂肪率"] !== "" &&
-                                record["体脂肪率"] !== undefined
-                                  ? Number(
-                                      record["体脂肪率"]
-                                    ).toFixed(1)
-                                  : "—"
-                              }
-                            </strong>
-                            %
-                          </div>
-
-                        </div>
-
-                      `;
+                      div.appendChild(
+                        missedDiv
+                      );
 
                     }
+
+
+                    // ==================================
+                    // 通常記録
+                    // ==================================
+
+                    else {
+
+                      const valuesDiv =
+                        document.createElement(
+                          "div"
+                        );
+
+                      valuesDiv.className =
+                        "record-values";
+
+
+                      valuesDiv.innerHTML = `
+
+                        <div class="record-value">
+                          体重
+                          <strong>
+                            ${
+                              record["体重"] !== null &&
+                              record["体重"] !== "" &&
+                              record["体重"] !== undefined
+                                ? Number(
+                                    record["体重"]
+                                  ).toFixed(1)
+                                : "—"
+                            }
+                          </strong>
+                          kg
+                        </div>
+
+                        <div class="record-value">
+                          BMI
+                          <strong>
+                            ${
+                              record["BMI"] !== null &&
+                              record["BMI"] !== "" &&
+                              record["BMI"] !== undefined
+                                ? Number(
+                                    record["BMI"]
+                                  ).toFixed(1)
+                                : "—"
+                            }
+                          </strong>
+                        </div>
+
+                        <div class="record-value">
+                          体脂肪率
+                          <strong>
+                            ${
+                              record["体脂肪率"] !== null &&
+                              record["体脂肪率"] !== "" &&
+                              record["体脂肪率"] !== undefined
+                                ? Number(
+                                    record["体脂肪率"]
+                                  ).toFixed(1)
+                                : "—"
+                            }
+                          </strong>
+                          %
+                        </div>
+
+                      `;
+
+
+                      div.appendChild(
+                        valuesDiv
+                      );
+
+                    }
+
+
+                    // ==================================
+                    // 編集ボタン
+                    // ==================================
+
+                    const editButton =
+                      document.createElement(
+                        "button"
+                      );
+
+                    editButton.type =
+                      "button";
+
+                    editButton.className =
+                      "edit-record-button";
+
+                    editButton.textContent =
+                      "編集";
+
+
+                    editButton.addEventListener(
+                      "click",
+                      function() {
+
+                        editRecord(
+                          record,
+                          editDate
+                        );
+
+                      }
+                    );
+
+
+                    div.appendChild(
+                      editButton
+                    );
 
 
                     monthDetails.appendChild(
@@ -819,6 +855,84 @@ function displayRecords(
 
       }
     );
+
+}
+
+
+// ========================================
+// 過去の記録を編集
+// ========================================
+
+function editRecord(
+  record,
+  date
+) {
+
+  editingDate =
+    date;
+
+
+  // ----------------------------------------
+  // 入力欄へ反映
+  // ----------------------------------------
+
+  document.getElementById(
+    "weight"
+  ).value =
+    record["体重"] !== null &&
+    record["体重"] !== undefined
+      ? record["体重"]
+      : "";
+
+
+  document.getElementById(
+    "bmi"
+  ).value =
+    record["BMI"] !== null &&
+    record["BMI"] !== undefined
+      ? record["BMI"]
+      : "";
+
+
+  document.getElementById(
+    "bodyFat"
+  ).value =
+    record["体脂肪率"] !== null &&
+    record["体脂肪率"] !== undefined
+      ? record["体脂肪率"]
+      : "";
+
+
+  const message =
+    document.getElementById(
+      "message"
+    );
+
+
+  message.textContent =
+    `${date} の記録を編集しています。`;
+
+
+  // ----------------------------------------
+  // 保存ボタンの表示
+  // ----------------------------------------
+
+  document.getElementById(
+    "saveButton"
+  ).textContent =
+    "記録を更新する";
+
+
+  // ----------------------------------------
+  // 入力欄までスクロール
+  // ----------------------------------------
+
+  document.getElementById(
+    "weight"
+  ).scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
 
 }
 
@@ -932,10 +1046,6 @@ function showCharts() {
   );
 
 
-  // ========================================
-  // 選択された日付
-  // ========================================
-
   const startDate =
     getSelectedDate(
       "startYear",
@@ -951,10 +1061,6 @@ function showCharts() {
       "endDay"
     );
 
-
-  // ========================================
-  // 日付チェック
-  // ========================================
 
   if (
     !startDate ||
@@ -983,10 +1089,6 @@ function showCharts() {
   }
 
 
-  // ========================================
-  // 指定期間のデータ
-  // ========================================
-
   const filteredRecords =
     allRecords
       .filter(
@@ -1012,10 +1114,6 @@ function showCharts() {
       );
 
 
-  // ========================================
-  // データがない場合
-  // ========================================
-
   if (
     filteredRecords.length === 0
   ) {
@@ -1028,10 +1126,6 @@ function showCharts() {
 
   }
 
-
-  // ========================================
-  // 横軸
-  // ========================================
 
   const labels =
     filteredRecords.map(
@@ -1136,10 +1230,6 @@ function showCharts() {
   }
 
 
-  // ========================================
-  // Canvas
-  // ========================================
-
   const canvas =
     document.getElementById(
       "weightChart"
@@ -1173,10 +1263,6 @@ function showCharts() {
 
           datasets: [
 
-            // ==================================
-            // 体重
-            // ==================================
-
             {
 
               type:
@@ -1193,10 +1279,6 @@ function showCharts() {
 
             },
 
-
-            // ==================================
-            // 体脂肪率
-            // ==================================
 
             {
 
@@ -1259,10 +1341,6 @@ function showCharts() {
 
           scales: {
 
-            // ==================================
-            // 左：体重
-            // ==================================
-
             weightAxis: {
 
               type:
@@ -1289,10 +1367,6 @@ function showCharts() {
 
             },
 
-
-            // ==================================
-            // 右：体脂肪率
-            // ==================================
 
             bodyFatAxis: {
 
@@ -1438,7 +1512,7 @@ function saveToGAS(
 
 
 // ========================================
-// 通常の記録
+// 通常の記録・過去記録の更新
 // ========================================
 
 function saveMeasurement() {
@@ -1476,7 +1550,13 @@ function saveMeasurement() {
   }
 
 
+  // ----------------------------------------
+  // 編集中なら過去の日付
+  // 編集していなければ今日
+  // ----------------------------------------
+
   const date =
+    editingDate ||
     getTodayString();
 
 
@@ -1515,6 +1595,13 @@ function saveMeasurement() {
 
 
       if (
+        editingDate
+      ) {
+
+        message.textContent =
+          `${editingDate} の記録を更新しました。`;
+
+      } else if (
         result.updated
       ) {
 
@@ -1529,84 +1616,34 @@ function saveMeasurement() {
       }
 
 
-      loadRecords();
+      // 編集状態を解除
 
-    }
-  );
-
-}
+      editingDate =
+        null;
 
 
-// ========================================
-// 計測忘れ
-// ========================================
-
-function saveMissedMeasurement() {
-
-  const date =
-    getTodayString();
+      document.getElementById(
+        "saveButton"
+      ).textContent =
+        "記録する";
 
 
-  const confirmed =
-    confirm(
-      "今日は「計測忘れ」として記録しますか？"
-    );
+      // 入力欄をクリア
 
+      document.getElementById(
+        "weight"
+      ).value =
+        "";
 
-  if (!confirmed) {
+      document.getElementById(
+        "bmi"
+      ).value =
+        "";
 
-    return;
-
-  }
-
-
-  const message =
-    document.getElementById(
-      "message"
-    );
-
-
-  message.textContent =
-    "保存しています……";
-
-
-  saveToGAS(
-    date,
-    "",
-    "",
-    "",
-    "計測忘れ",
-    function(result) {
-
-      if (
-        !result.success
-      ) {
-
-        message.textContent =
-          "保存に失敗しました。";
-
-        console.error(
-          result.error
-        );
-
-        return;
-
-      }
-
-
-      if (
-        result.updated
-      ) {
-
-        message.textContent =
-          "今日の記録を「計測忘れ」に更新しました。";
-
-      } else {
-
-        message.textContent =
-          "計測忘れとして記録しました。";
-
-      }
+      document.getElementById(
+        "bodyFat"
+      ).value =
+        "";
 
 
       loadRecords();
@@ -1628,16 +1665,6 @@ document
   .addEventListener(
     "click",
     saveMeasurement
-  );
-
-
-document
-  .getElementById(
-    "missedButton"
-  )
-  .addEventListener(
-    "click",
-    saveMissedMeasurement
   );
 
 
