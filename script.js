@@ -1,46 +1,34 @@
 const GAS_URL =
-  "https://script.google.com/macros/s/AKfycbzerkaBq6IVdttxu2H2icHyipUsUa9kAUcY8dhx84w45iUuh1V1hynKPafapIz6CXjAuA/exec";
-
-
-// ========================================
-// グローバル変数
-// ========================================
+  "https://script.google.com/macros/s/AKfycbyQJs9ePOXx81iMKIFs9gwPY0dSi9kwE0VSAXfmbo3FIxOqtmNQoZ9LExrIi51HvbEUbA/exec";
 
 let allRecords = [];
-
 let weightChart = null;
-
-// 編集中の日付
 let editingDate = null;
 
 
-// ========================================
-// 今日の日付
-// ========================================
+/* ========================================
+   今日の日付
+======================================== */
 
 function getTodayString() {
 
   const today = new Date();
 
-  const year =
-    today.getFullYear();
+  const year = today.getFullYear();
 
   const month =
-    String(today.getMonth() + 1)
-      .padStart(2, "0");
+    String(today.getMonth() + 1).padStart(2, "0");
 
   const day =
-    String(today.getDate())
-      .padStart(2, "0");
+    String(today.getDate()).padStart(2, "0");
 
   return `${year}-${month}-${day}`;
-
 }
 
 
-// ========================================
-// 今日の日付を表示
-// ========================================
+/* ========================================
+   今日の日付表示
+======================================== */
 
 function displayTodayDate() {
 
@@ -56,33 +44,96 @@ function displayTodayDate() {
     "Sat."
   ];
 
-  const year =
-    today.getFullYear();
+  const year = today.getFullYear();
 
   const month =
-    String(today.getMonth() + 1)
-      .padStart(2, "0");
+    String(today.getMonth() + 1).padStart(2, "0");
 
   const day =
-    String(today.getDate())
-      .padStart(2, "0");
+    String(today.getDate()).padStart(2, "0");
 
-  document.getElementById(
-    "todayDate"
-  ).textContent =
+  document.getElementById("todayDate").textContent =
     `${year}-${month}-${day} ${weekdays[today.getDay()]}`;
-
 }
 
 
-// ========================================
-// 年・月・日プルダウン
-// ========================================
+/* ========================================
+   option作成
+======================================== */
+
+function createOption(value, text) {
+
+  const option =
+    document.createElement("option");
+
+  option.value = String(value);
+  option.textContent = text;
+
+  return option;
+}
+
+
+/* ========================================
+   日の更新
+======================================== */
+
+function updateDays(
+  yearSelect,
+  monthSelect,
+  daySelect,
+  preferredDay = null
+) {
+
+  const year = Number(yearSelect.value);
+  const month = Number(monthSelect.value);
+
+  const oldDay =
+    preferredDay !== null
+      ? Number(preferredDay)
+      : Number(daySelect.value);
+
+  daySelect.innerHTML = "";
+
+  if (!year || !month) {
+    return;
+  }
+
+  const daysInMonth =
+    new Date(year, month, 0).getDate();
+
+  for (
+    let day = 1;
+    day <= daysInMonth;
+    day++
+  ) {
+
+    daySelect.appendChild(
+      createOption(day, `${day}日`)
+    );
+  }
+
+  if (
+    oldDay >= 1 &&
+    oldDay <= daysInMonth
+  ) {
+
+    daySelect.value = String(oldDay);
+
+  } else {
+
+    daySelect.value =
+      String(daysInMonth);
+  }
+}
+
+
+/* ========================================
+   年・月・日セレクター
+======================================== */
 
 function setupDateSelectors() {
 
-  const currentDate =
-    new Date();
+  const currentDate = new Date();
 
   const currentYear =
     currentDate.getFullYear();
@@ -93,7 +144,6 @@ function setupDateSelectors() {
   const currentDay =
     currentDate.getDate();
 
-
   const startYear =
     document.getElementById("startYear");
 
@@ -102,7 +152,6 @@ function setupDateSelectors() {
 
   const startDay =
     document.getElementById("startDay");
-
 
   const endYear =
     document.getElementById("endYear");
@@ -114,9 +163,7 @@ function setupDateSelectors() {
     document.getElementById("endDay");
 
 
-  // ========================================
-  // 年
-  // ========================================
+  /* 年 */
 
   for (
     let year = currentYear;
@@ -125,25 +172,16 @@ function setupDateSelectors() {
   ) {
 
     startYear.appendChild(
-      createOption(
-        year,
-        `${year}年`
-      )
+      createOption(year, `${year}年`)
     );
 
     endYear.appendChild(
-      createOption(
-        year,
-        `${year}年`
-      )
+      createOption(year, `${year}年`)
     );
-
   }
 
 
-  // ========================================
-  // 月
-  // ========================================
+  /* 月 */
 
   for (
     let month = 1;
@@ -152,31 +190,19 @@ function setupDateSelectors() {
   ) {
 
     startMonth.appendChild(
-      createOption(
-        month,
-        `${month}月`
-      )
+      createOption(month, `${month}月`)
     );
 
     endMonth.appendChild(
-      createOption(
-        month,
-        `${month}月`
-      )
+      createOption(month, `${month}月`)
     );
-
   }
 
 
-  // ========================================
-  // 初期値
-  // ========================================
+  /* 初期値 */
 
-  startYear.value =
-    String(currentYear);
-
-  startMonth.value =
-    String(currentMonth);
+  startYear.value = String(currentYear);
+  startMonth.value = String(currentMonth);
 
   updateDays(
     startYear,
@@ -185,12 +211,8 @@ function setupDateSelectors() {
     currentDay
   );
 
-
-  endYear.value =
-    String(currentYear);
-
-  endMonth.value =
-    String(currentMonth);
+  endYear.value = String(currentYear);
+  endMonth.value = String(currentMonth);
 
   updateDays(
     endYear,
@@ -200,187 +222,64 @@ function setupDateSelectors() {
   );
 
 
-  // ========================================
-  // 開始日：年・月変更時
-  // ========================================
+  /* 開始日 */
 
   startYear.addEventListener(
     "change",
-    function() {
+    function () {
 
       updateDays(
         startYear,
         startMonth,
         startDay
       );
-
     }
   );
-
 
   startMonth.addEventListener(
     "change",
-    function() {
+    function () {
 
       updateDays(
         startYear,
         startMonth,
         startDay
       );
-
     }
   );
 
 
-  // ========================================
-  // 終了日：年・月変更時
-  // ========================================
+  /* 終了日 */
 
   endYear.addEventListener(
     "change",
-    function() {
+    function () {
 
       updateDays(
         endYear,
         endMonth,
         endDay
       );
-
     }
   );
-
 
   endMonth.addEventListener(
     "change",
-    function() {
+    function () {
 
       updateDays(
         endYear,
         endMonth,
         endDay
       );
-
     }
   );
-
 }
 
 
-// ========================================
-// option作成
-// ========================================
-
-function createOption(
-  value,
-  text
-) {
-
-  const option =
-    document.createElement("option");
-
-  option.value =
-    String(value);
-
-  option.textContent =
-    text;
-
-  return option;
-
-}
-
-
-// ========================================
-// 日の更新
-// ========================================
-
-function updateDays(
-  yearSelect,
-  monthSelect,
-  daySelect,
-  preferredDay = null
-) {
-
-  const year =
-    Number(yearSelect.value);
-
-  const month =
-    Number(monthSelect.value);
-
-
-  const oldDay =
-    preferredDay !== null
-      ? Number(preferredDay)
-      : Number(daySelect.value);
-
-
-  daySelect.innerHTML = "";
-
-
-  if (!year || !month) {
-
-    return;
-
-  }
-
-
-  // ========================================
-  // 月末の日付を取得
-  // ========================================
-
-  const daysInMonth =
-    new Date(
-      year,
-      month,
-      0
-    ).getDate();
-
-
-  // ========================================
-  // 1日～月末まで
-  // 「日」という空の項目は作らない
-  // ========================================
-
-  for (
-    let day = 1;
-    day <= daysInMonth;
-    day++
-  ) {
-
-    daySelect.appendChild(
-      createOption(
-        day,
-        `${day}日`
-      )
-    );
-
-  }
-
-
-  // ========================================
-  // 以前選択していた日を維持
-  // ========================================
-
-  if (
-    oldDay >= 1 &&
-    oldDay <= daysInMonth
-  ) {
-
-    daySelect.value =
-      String(oldDay);
-
-  } else {
-
-    daySelect.value =
-      String(daysInMonth);
-
-  }
-
-}
-
-
-// ========================================
-// プルダウンから日付を取得
-// ========================================
+/* ========================================
+   選択された日付
+======================================== */
 
 function getSelectedDate(
   yearId,
@@ -389,163 +288,101 @@ function getSelectedDate(
 ) {
 
   const year =
-    document.getElementById(
-      yearId
-    ).value;
+    document.getElementById(yearId).value;
 
   const month =
-    document.getElementById(
-      monthId
-    ).value;
+    document.getElementById(monthId).value;
 
   const day =
-    document.getElementById(
-      dayId
-    ).value;
+    document.getElementById(dayId).value;
 
-
-  if (
-    !year ||
-    !month ||
-    !day
-  ) {
-
+  if (!year || !month || !day) {
     return "";
-
   }
-
 
   return (
     `${year}-` +
     `${String(month).padStart(2, "0")}-` +
     `${String(day).padStart(2, "0")}`
   );
-
 }
 
 
-// ========================================
-// GASからデータを取得
-// ========================================
+/* ========================================
+   GASからデータ取得
+======================================== */
 
 function loadRecords() {
-
-  console.log(
-    "loadRecords が実行されました"
-  );
-
 
   const script =
     document.createElement("script");
 
-
   const callbackName =
-    "receiveWeightData_" +
-    Date.now();
-
+    "receiveWeightData_" + Date.now();
 
   window[callbackName] =
-    function(records) {
+    function (records) {
 
-      console.log(
-        "GASからデータを受信しました"
-      );
+      allRecords = Array.isArray(records)
+        ? records
+        : [];
 
-      console.log(records);
-
-
-      allRecords =
-        records;
-
-
-      displayRecords(
-        records
-      );
-
+      displayRecords(allRecords);
 
       delete window[callbackName];
-
       script.remove();
-
     };
-
 
   script.src =
     GAS_URL +
     "?callback=" +
-    encodeURIComponent(
-      callbackName
-    );
-
+    encodeURIComponent(callbackName);
 
   script.onerror =
-    function() {
-
-      console.error(
-        "GASへの接続に失敗しました"
-      );
-
+    function () {
 
       document.getElementById(
         "recordList"
       ).textContent =
         "データを取得できませんでした。";
 
-
       delete window[callbackName];
-
       script.remove();
-
     };
 
-
-  document.body.appendChild(
-    script
-  );
-
+  document.body.appendChild(script);
 }
 
 
-// ========================================
-// 記録一覧
-// ========================================
+/* ========================================
+   記録一覧
+======================================== */
 
-function displayRecords(
-  records
-) {
+function displayRecords(records) {
 
   const recordList =
-    document.getElementById(
-      "recordList"
+    document.getElementById("recordList");
+
+  recordList.innerHTML = "";
+
+  const sortedRecords =
+    [...records].sort(
+      (a, b) =>
+        new Date(b["日付"]) -
+        new Date(a["日付"])
     );
-
-
-  recordList.innerHTML =
-    "";
-
-
-  // ========================================
-  // 新しい日付順
-  // ========================================
-
-  records.sort(
-    (a, b) =>
-      new Date(b["日付"]) -
-      new Date(a["日付"])
-  );
-
 
   const years = {};
 
+  sortedRecords.forEach(
+    function (record) {
 
-  records.forEach(
-    record => {
+      if (!record["日付"]) {
+        return;
+      }
 
       const date =
-        new Date(
-          record["日付"]
-        );
-
+        new Date(record["日付"]);
 
       const year =
         date.getFullYear();
@@ -553,415 +390,277 @@ function displayRecords(
       const month =
         date.getMonth() + 1;
 
-
       if (!years[year]) {
-
         years[year] = {};
-
       }
-
 
       if (!years[year][month]) {
-
         years[year][month] = [];
-
       }
 
-
-      years[year][month].push(
-        record
-      );
-
+      years[year][month].push(record);
     }
   );
 
 
-  // ========================================
-  // 年
-  // ========================================
-
   Object.keys(years)
-    .sort(
-      (a, b) =>
-        b - a
-    )
+    .sort((a, b) => b - a)
     .forEach(
-      year => {
+      function (year) {
 
         const yearDetails =
-          document.createElement(
-            "details"
-          );
-
+          document.createElement("details");
 
         yearDetails.className =
           "year-group";
 
-
-        // 現在の年を開く
-
         if (
           year ===
-          String(
-            new Date().getFullYear()
-          )
+          String(new Date().getFullYear())
         ) {
 
-          yearDetails.open =
-            true;
-
+          yearDetails.open = true;
         }
 
-
         const yearSummary =
-          document.createElement(
-            "summary"
-          );
-
+          document.createElement("summary");
 
         yearSummary.textContent =
           `${year}年`;
-
 
         yearDetails.appendChild(
           yearSummary
         );
 
 
-        // ========================================
-        // 月
-        // ========================================
-
-        Object.keys(
-          years[year]
-        )
-          .sort(
-            (a, b) =>
-              b - a
-          )
+        Object.keys(years[year])
+          .sort((a, b) => b - a)
           .forEach(
-            month => {
+            function (month) {
 
               const monthDetails =
-                document.createElement(
-                  "details"
-                );
-
+                document.createElement("details");
 
               monthDetails.className =
                 "month-group";
 
-
-              // 現在の月を開く
-
               if (
                 year ===
                   String(
-                    new Date()
-                      .getFullYear()
-                  )
-                &&
+                    new Date().getFullYear()
+                  ) &&
                 Number(month) ===
-                  new Date()
-                    .getMonth() + 1
+                  new Date().getMonth() + 1
               ) {
 
-                monthDetails.open =
-                  true;
-
+                monthDetails.open = true;
               }
 
-
               const monthSummary =
-                document.createElement(
-                  "summary"
-                );
-
+                document.createElement("summary");
 
               monthSummary.textContent =
                 `${month}月`;
-
 
               monthDetails.appendChild(
                 monthSummary
               );
 
 
-              // ========================================
-              // 各記録
-              // ========================================
+              years[year][month].forEach(
+                function (record) {
 
-              years[year][month]
-                .forEach(
-                  record => {
+                  const div =
+                    document.createElement("div");
 
-                    const div =
-                      document.createElement(
-                        "div"
-                      );
+                  div.className = "record";
 
+                  const date =
+                    formatDate(record["日付"]);
 
-                    div.className =
-                      "record";
-
-
-                    const date =
-                      formatDate(
-                        record["日付"]
-                      );
-
-
-                    const recordDate =
-                      formatDateForComparison(
-                        record["日付"]
-                      );
-
-
-                    // ========================================
-                    // 記録表示
-                    // ========================================
-
-                    if (
-                      record["状態"] ===
-                      "計測忘れ"
-                    ) {
-
-                      div.innerHTML = `
-
-                        <div class="record-date">
-                          ${date}
-                        </div>
-
-                        <div class="record-missed">
-                          計測忘れ
-                        </div>
-
-                        <button
-                          type="button"
-                          class="edit-record-button"
-                        >
-                          編集
-                        </button>
-
-                      `;
-
-                    } else {
-
-                      div.innerHTML = `
-
-                        <div class="record-date">
-                          ${date}
-                        </div>
-
-                        <div class="record-values">
-
-                          <div class="record-value">
-                            体重
-                            <strong>
-                              ${
-                                record["体重"] !== null &&
-                                record["体重"] !== "" &&
-                                record["体重"] !== undefined
-                                  ? Number(
-                                      record["体重"]
-                                    ).toFixed(1)
-                                  : "—"
-                              }
-                            </strong>
-                            kg
-                          </div>
-
-                          <div class="record-value">
-                            BMI
-                            <strong>
-                              ${
-                                record["BMI"] !== null &&
-                                record["BMI"] !== "" &&
-                                record["BMI"] !== undefined
-                                  ? Number(
-                                      record["BMI"]
-                                    ).toFixed(1)
-                                  : "—"
-                              }
-                            </strong>
-                          </div>
-
-                          <div class="record-value">
-                            体脂肪率
-                            <strong>
-                              ${
-                                record["体脂肪率"] !== null &&
-                                record["体脂肪率"] !== "" &&
-                                record["体脂肪率"] !== undefined
-                                  ? Number(
-                                      record["体脂肪率"]
-                                    ).toFixed(1)
-                                  : "—"
-                              }
-                            </strong>
-                            %
-                          </div>
-
-                        </div>
-
-                        <button
-                          type="button"
-                          class="edit-record-button"
-                        >
-                          編集
-                        </button>
-
-                      `;
-
-                    }
-
-
-                    // ========================================
-                    // 編集ボタン
-                    // ========================================
-
-                    const editButton =
-                      div.querySelector(
-                        ".edit-record-button"
-                      );
-
-
-                    if (editButton) {
-
-                      editButton.addEventListener(
-                        "click",
-                        function() {
-
-                          editRecord(
-                            record,
-                            recordDate
-                          );
-
-                        }
-                      );
-
-                    }
-
-
-                    monthDetails.appendChild(
-                      div
+                  const recordDate =
+                    formatDateForComparison(
+                      record["日付"]
                     );
 
-                  }
-                );
 
+                  const editButton =
+                    document.createElement("button");
+
+                  editButton.type = "button";
+                  editButton.className =
+                    "edit-record-button";
+
+                  editButton.textContent =
+                    "編集";
+
+                  editButton.addEventListener(
+                    "click",
+                    function () {
+
+                      editRecord(
+                        record,
+                        recordDate
+                      );
+                    }
+                  );
+
+
+                  const dateDiv =
+                    document.createElement("div");
+
+                  dateDiv.className =
+                    "record-date";
+
+                  dateDiv.textContent =
+                    date;
+
+                  div.appendChild(dateDiv);
+
+
+                  if (
+                    record["状態"] ===
+                    "計測忘れ"
+                  ) {
+
+                    const missed =
+                      document.createElement("div");
+
+                    missed.className =
+                      "record-missed";
+
+                    missed.textContent =
+                      "計測忘れ";
+
+                    div.appendChild(missed);
+
+                  } else {
+
+                    const values =
+                      document.createElement("div");
+
+                    values.className =
+                      "record-values";
+
+                    values.innerHTML =
+                      `
+                        <div class="record-value">
+                          体重
+                          <strong>
+                            ${formatNumber(record["体重"])}
+                          </strong>
+                          kg
+                        </div>
+
+                        <div class="record-value">
+                          BMI
+                          <strong>
+                            ${formatNumber(record["BMI"])}
+                          </strong>
+                        </div>
+
+                        <div class="record-value">
+                          体脂肪率
+                          <strong>
+                            ${formatNumber(record["体脂肪率"])}
+                          </strong>
+                          %
+                        </div>
+                      `;
+
+                    div.appendChild(values);
+                  }
+
+                  div.appendChild(editButton);
+
+                  monthDetails.appendChild(div);
+                }
+              );
 
               yearDetails.appendChild(
                 monthDetails
               );
-
             }
           );
-
 
         recordList.appendChild(
           yearDetails
         );
-
       }
     );
-
 }
 
 
-// ========================================
-// 過去の記録を編集
-// ========================================
+/* ========================================
+   数値表示
+======================================== */
+
+function formatNumber(value) {
+
+  if (
+    value === null ||
+    value === "" ||
+    value === undefined
+  ) {
+
+    return "—";
+  }
+
+  const number = Number(value);
+
+  if (!Number.isFinite(number)) {
+    return "—";
+  }
+
+  return number.toFixed(1);
+}
+
+
+/* ========================================
+   過去記録の編集
+======================================== */
 
 function editRecord(
   record,
   recordDate
 ) {
 
-  editingDate =
-    recordDate;
+  editingDate = recordDate;
 
+  const weight =
+    document.getElementById("weight");
 
-  const weightInput =
-    document.getElementById(
-      "weight"
-    );
+  const bmi =
+    document.getElementById("bmi");
 
-  const bmiInput =
-    document.getElementById(
-      "bmi"
-    );
-
-  const bodyFatInput =
-    document.getElementById(
-      "bodyFat"
-    );
-
-
-  // ========================================
-  // 入力欄へ値を入れる
-  // ========================================
+  const bodyFat =
+    document.getElementById("bodyFat");
 
   if (
     record["状態"] ===
     "計測忘れ"
   ) {
 
-    weightInput.value =
-      "";
-
-    bmiInput.value =
-      "";
-
-    bodyFatInput.value =
-      "";
+    weight.value = "";
+    bmi.value = "";
+    bodyFat.value = "";
 
   } else {
 
-    weightInput.value =
-      record["体重"] !== null &&
-      record["体重"] !== ""
-        ? Number(
-            record["体重"]
-          )
-        : "";
+    weight.value =
+      record["体重"] ?? "";
 
-    bmiInput.value =
-      record["BMI"] !== null &&
-      record["BMI"] !== ""
-        ? Number(
-            record["BMI"]
-          )
-        : "";
+    bmi.value =
+      record["BMI"] ?? "";
 
-    bodyFatInput.value =
-      record["体脂肪率"] !== null &&
-      record["体脂肪率"] !== ""
-        ? Number(
-            record["体脂肪率"]
-          )
-        : "";
-
+    bodyFat.value =
+      record["体脂肪率"] ?? "";
   }
 
-
-  // ========================================
-  // メッセージ
-  // ========================================
-
-  const message =
-    document.getElementById(
-      "message"
-    );
-
-
-  message.textContent =
+  document.getElementById(
+    "message"
+  ).textContent =
     `${recordDate} の記録を編集中です。`;
-
-
-  // ========================================
-  // 入力欄まで移動
-  // ========================================
 
   document.querySelector(
     ".input-section"
@@ -970,25 +669,18 @@ function editRecord(
     block: "start"
   });
 
-
-  weightInput.focus();
-
+  weight.focus();
 }
 
 
-// ========================================
-// 日付表示
-// ========================================
+/* ========================================
+   日付表示
+======================================== */
 
-function formatDate(
-  dateString
-) {
+function formatDate(dateString) {
 
   const date =
-    new Date(
-      dateString
-    );
-
+    new Date(dateString);
 
   const weekdays = [
     "Sun.",
@@ -1000,94 +692,55 @@ function formatDate(
     "Sat."
   ];
 
-
   const year =
     date.getFullYear();
 
-
   const month =
-    String(
-      date.getMonth() + 1
-    ).padStart(
-      2,
-      "0"
-    );
-
+    String(date.getMonth() + 1)
+      .padStart(2, "0");
 
   const day =
-    String(
-      date.getDate()
-    ).padStart(
-      2,
-      "0"
-    );
-
+    String(date.getDate())
+      .padStart(2, "0");
 
   return (
     `${year}-${month}-${day} ` +
     `${weekdays[date.getDay()]}`
   );
-
 }
 
 
-// ========================================
-// 比較用の日付
-// ========================================
+/* ========================================
+   比較用日付
+======================================== */
 
 function formatDateForComparison(
   dateString
 ) {
 
   const date =
-    new Date(
-      dateString
-    );
-
+    new Date(dateString);
 
   const year =
     date.getFullYear();
 
-
   const month =
-    String(
-      date.getMonth() + 1
-    ).padStart(
-      2,
-      "0"
-    );
-
+    String(date.getMonth() + 1)
+      .padStart(2, "0");
 
   const day =
-    String(
-      date.getDate()
-    ).padStart(
-      2,
-      "0"
-    );
+    String(date.getDate())
+      .padStart(2, "0");
 
-
-  return (
-    `${year}-${month}-${day}`
-  );
-
+  return `${year}-${month}-${day}`;
 }
 
 
-// ========================================
-// グラフ表示
-// ========================================
+/* ========================================
+   グラフ
+======================================== */
 
 function showCharts() {
-
-  console.log(
-    "グラフを表示します"
-  );
-
-
-  // ========================================
-  // 選択された日付
-  // ========================================
 
   const startDate =
     getSelectedDate(
@@ -1096,7 +749,6 @@ function showCharts() {
       "startDay"
     );
 
-
   const endDate =
     getSelectedDate(
       "endYear",
@@ -1104,100 +756,64 @@ function showCharts() {
       "endDay"
     );
 
-
-  // ========================================
-  // 日付チェック
-  // ========================================
-
-  if (
-    !startDate ||
-    !endDate
-  ) {
+  if (!startDate || !endDate) {
 
     alert(
       "開始日と終了日を指定してください。"
     );
 
     return;
-
   }
 
-
-  if (
-    startDate > endDate
-  ) {
+  if (startDate > endDate) {
 
     alert(
       "開始日は終了日より前の日付にしてください。"
     );
 
     return;
-
   }
-
-
-  // ========================================
-  // 指定期間のデータ
-  // ========================================
 
   const filteredRecords =
     allRecords
       .filter(
-        record => {
+        function (record) {
 
           const date =
             formatDateForComparison(
               record["日付"]
             );
 
-
           return (
             date >= startDate &&
             date <= endDate
           );
-
         }
       )
       .sort(
-        (a, b) =>
-          new Date(a["日付"]) -
-          new Date(b["日付"])
+        function (a, b) {
+
+          return (
+            new Date(a["日付"]) -
+            new Date(b["日付"])
+          );
+        }
       );
 
-
-  // ========================================
-  // データがない場合
-  // ========================================
-
-  if (
-    filteredRecords.length === 0
-  ) {
+  if (filteredRecords.length === 0) {
 
     alert(
       "指定した期間にデータがありません。"
     );
 
     return;
-
   }
-
-
-  // ========================================
-  // 横軸
-  // ========================================
 
   const labels =
     filteredRecords.map(
       record =>
-        formatDate(
-          record["日付"]
-        )
+        formatDate(record["日付"])
     );
-
-
-  // ========================================
-  // 体重
-  // ========================================
 
   const weights =
     filteredRecords.map(
@@ -1209,35 +825,16 @@ function showCharts() {
         ) {
 
           return null;
-
         }
-
 
         const value =
-          Number(
-            record["体重"]
-          );
+          Number(record["体重"]);
 
-
-        if (
-          !Number.isFinite(value) ||
-          value === 0
-        ) {
-
-          return null;
-
-        }
-
-
-        return value;
-
+        return Number.isFinite(value)
+          ? value
+          : null;
       }
     );
-
-
-  // ========================================
-  // 体脂肪率
-  // ========================================
 
   const bodyFats =
     filteredRecords.map(
@@ -1249,70 +846,29 @@ function showCharts() {
         ) {
 
           return null;
-
         }
-
 
         const value =
-          Number(
-            record["体脂肪率"]
-          );
+          Number(record["体脂肪率"]);
 
-
-        if (
-          !Number.isFinite(value) ||
-          value === 0
-        ) {
-
-          return null;
-
-        }
-
-
-        return value;
-
+        return Number.isFinite(value)
+          ? value
+          : null;
       }
     );
 
 
-  // ========================================
-  // 既存グラフ削除
-  // ========================================
-
   if (weightChart) {
 
     weightChart.destroy();
-
-    weightChart =
-      null;
-
+    weightChart = null;
   }
 
-
-  // ========================================
-  // Canvas
-  // ========================================
 
   const canvas =
     document.getElementById(
       "weightChart"
     );
-
-
-  if (!canvas) {
-
-    console.error(
-      "weightChart が見つかりません。"
-    );
-
-    return;
-
-  }
-
-
-  // ========================================
-  // グラフ
-  // ========================================
 
   weightChart =
     new Chart(
@@ -1321,178 +877,90 @@ function showCharts() {
 
         data: {
 
-          labels:
-            labels,
+          labels: labels,
 
           datasets: [
 
-            // ==================================
-            // 体重
-            // ==================================
-
             {
-
-              type:
-                "bar",
-
-              label:
-                "体重 (kg)",
-
-              data:
-                weights,
-
-              yAxisID:
-                "weightAxis"
-
+              type: "bar",
+              label: "体重 (kg)",
+              data: weights,
+              yAxisID: "weightAxis"
             },
 
-
-            // ==================================
-            // 体脂肪率
-            // ==================================
-
             {
-
-              type:
-                "line",
-
-              label:
-                "体脂肪率 (%)",
-
-              data:
-                bodyFats,
-
-              yAxisID:
-                "bodyFatAxis",
-
-              tension:
-                0.2,
-
-              fill:
-                false,
-
-              pointRadius:
-                0,
-
-              pointHoverRadius:
-                0,
-
-              spanGaps:
-                false
-
+              type: "line",
+              label: "体脂肪率 (%)",
+              data: bodyFats,
+              yAxisID: "bodyFatAxis",
+              tension: 0.2,
+              fill: false,
+              pointRadius: 3,
+              spanGaps: false
             }
 
           ]
-
         },
 
 
         options: {
 
-          responsive:
-            true,
+          responsive: true,
 
-          maintainAspectRatio:
-            false,
-
-          spanGaps:
-            false,
-
+          maintainAspectRatio: false,
 
           interaction: {
-
-            mode:
-              "index",
-
-            intersect:
-              false
-
+            mode: "index",
+            intersect: false
           },
-
 
           scales: {
 
-            // ==================================
-            // 左：体重
-            // ==================================
-
             weightAxis: {
 
-              type:
-                "linear",
+              type: "linear",
 
-              position:
-                "left",
+              position: "left",
 
-              min:
-                60,
+              min: 60,
 
-              max:
-                70,
+              max: 70,
 
               title: {
-
-                display:
-                  true,
-
-                text:
-                  "体重 (kg)"
-
+                display: true,
+                text: "体重 (kg)"
               }
-
             },
-
-
-            // ==================================
-            // 右：体脂肪率
-            // ==================================
 
             bodyFatAxis: {
 
-              type:
-                "linear",
+              type: "linear",
 
-              position:
-                "right",
+              position: "right",
 
-              min:
-                10,
+              min: 10,
 
-              max:
-                20,
+              max: 20,
 
               title: {
-
-                display:
-                  true,
-
-                text:
-                  "体脂肪率 (%)"
-
+                display: true,
+                text: "体脂肪率 (%)"
               },
 
               grid: {
-
-                drawOnChartArea:
-                  false
-
+                drawOnChartArea: false
               }
-
             }
-
           }
-
         }
-
       }
     );
-
 }
 
 
-// ========================================
-// GASへ保存
-// ========================================
+/* ========================================
+   GASへ保存
+======================================== */
 
 function saveToGAS(
   date,
@@ -1504,95 +972,64 @@ function saveToGAS(
 ) {
 
   const script =
-    document.createElement(
-      "script"
-    );
-
+    document.createElement("script");
 
   const callbackName =
-    "saveResult_" +
-    Date.now();
-
+    "saveResult_" + Date.now();
 
   window[callbackName] =
-    function(result) {
+    function (result) {
 
-      callback(
-        result
-      );
-
+      callback(result);
 
       delete window[callbackName];
 
       script.remove();
-
     };
-
 
   const params =
     new URLSearchParams({
 
-      action:
-        "save",
+      action: "save",
 
-      date:
-        date,
+      date: date,
 
-      weight:
-        weight,
+      weight: weight,
 
-      bmi:
-        bmi,
+      bmi: bmi,
 
-      bodyFat:
-        bodyFat,
+      bodyFat: bodyFat,
 
-      status:
-        status,
+      status: status,
 
-      callback:
-        callbackName
-
+      callback: callbackName
     });
-
 
   script.src =
     GAS_URL +
     "?" +
     params.toString();
 
-
   script.onerror =
-    function() {
+    function () {
 
       callback({
-
-        success:
-          false,
-
-        error:
-          "GASへの接続に失敗しました。"
-
+        success: false,
+        error: "GASへの接続に失敗しました。"
       });
-
 
       delete window[callbackName];
 
       script.remove();
-
     };
 
-
-  document.body.appendChild(
-    script
-  );
-
+  document.body.appendChild(script);
 }
 
 
-// ========================================
-// 通常の記録・過去の記録の保存
-// ========================================
+/* ========================================
+   記録
+======================================== */
 
 function saveMeasurement() {
 
@@ -1601,18 +1038,15 @@ function saveMeasurement() {
       "weight"
     ).value;
 
-
   const bmi =
     document.getElementById(
       "bmi"
     ).value;
 
-
   const bodyFat =
     document.getElementById(
       "bodyFat"
     ).value;
-
 
   if (
     weight === "" ||
@@ -1625,14 +1059,8 @@ function saveMeasurement() {
     );
 
     return;
-
   }
 
-
-  // ========================================
-  // 編集中なら過去の日付
-  // 新規なら今日
-  // ========================================
 
   const date =
     editingDate ||
@@ -1644,7 +1072,6 @@ function saveMeasurement() {
       "message"
     );
 
-
   message.textContent =
     "保存しています……";
 
@@ -1655,38 +1082,25 @@ function saveMeasurement() {
     bmi,
     bodyFat,
     "計測済",
-    function(result) {
+    function (result) {
 
-      if (
-        !result.success
-      ) {
+      if (!result.success) {
 
         message.textContent =
           "保存に失敗しました。";
 
-        console.error(
-          result.error
-        );
+        console.error(result.error);
 
         return;
-
       }
 
 
-      // ========================================
-      // メッセージ
-      // ========================================
-
-      if (
-        editingDate
-      ) {
+      if (editingDate) {
 
         message.textContent =
           `${editingDate} の記録を更新しました。`;
 
-      } else if (
-        result.updated
-      ) {
+      } else if (result.updated) {
 
         message.textContent =
           "今日の記録を更新しました。";
@@ -1695,21 +1109,10 @@ function saveMeasurement() {
 
         message.textContent =
           "記録しました。";
-
       }
 
 
-      // ========================================
-      // 編集モード解除
-      // ========================================
-
-      editingDate =
-        null;
-
-
-      // ========================================
-      // 入力欄をクリア
-      // ========================================
+      editingDate = null;
 
       document.getElementById(
         "weight"
@@ -1724,45 +1127,34 @@ function saveMeasurement() {
       ).value = "";
 
 
-      // ========================================
-      // 記録一覧を再読み込み
-      // ========================================
-
       loadRecords();
-
     }
   );
-
 }
 
 
-// ========================================
-// ボタン
-// ========================================
+/* ========================================
+   ボタン
+======================================== */
 
 document
-  .getElementById(
-    "saveButton"
-  )
+  .getElementById("saveButton")
   .addEventListener(
     "click",
     saveMeasurement
   );
 
-
 document
-  .getElementById(
-    "chartButton"
-  )
+  .getElementById("chartButton")
   .addEventListener(
     "click",
     showCharts
   );
 
 
-// ========================================
-// 起動
-// ========================================
+/* ========================================
+   起動
+======================================== */
 
 setupDateSelectors();
 
