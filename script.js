@@ -1,4 +1,3 @@
-```javascript
 const GAS_URL =
   "https://script.google.com/macros/s/AKfycbzerkaBq6IVdttxu2H2icHyipUsUa9kAUcY8dhx84w45iUuh1V1hynKPafapIz6CXjAuA/exec";
 
@@ -104,6 +103,7 @@ function setupDateSelectors() {
   const startDay =
     document.getElementById("startDay");
 
+
   const endYear =
     document.getElementById("endYear");
 
@@ -201,7 +201,7 @@ function setupDateSelectors() {
 
 
   // ========================================
-  // 年・月変更時
+  // 開始日：年・月変更時
   // ========================================
 
   startYear.addEventListener(
@@ -231,6 +231,10 @@ function setupDateSelectors() {
     }
   );
 
+
+  // ========================================
+  // 終了日：年・月変更時
+  // ========================================
 
   endYear.addEventListener(
     "change",
@@ -303,6 +307,12 @@ function updateDays(
     Number(monthSelect.value);
 
 
+  const oldDay =
+    preferredDay !== null
+      ? Number(preferredDay)
+      : Number(daySelect.value);
+
+
   daySelect.innerHTML = "";
 
 
@@ -313,11 +323,9 @@ function updateDays(
   }
 
 
-  const oldDay =
-    preferredDay !== null
-      ? Number(preferredDay)
-      : Number(daySelect.value);
-
+  // ========================================
+  // 月末の日付を取得
+  // ========================================
 
   const daysInMonth =
     new Date(
@@ -328,7 +336,7 @@ function updateDays(
 
 
   // ========================================
-  // 1～月末まで
+  // 1日～月末まで
   // 「日」という空の項目は作らない
   // ========================================
 
@@ -516,6 +524,10 @@ function displayRecords(
     "";
 
 
+  // ========================================
+  // 新しい日付順
+  // ========================================
+
   records.sort(
     (a, b) =>
       new Date(b["日付"]) -
@@ -586,6 +598,8 @@ function displayRecords(
           "year-group";
 
 
+        // 現在の年を開く
+
         if (
           year ===
           String(
@@ -637,6 +651,8 @@ function displayRecords(
               monthDetails.className =
                 "month-group";
 
+
+              // 現在の月を開く
 
               if (
                 year ===
@@ -702,7 +718,7 @@ function displayRecords(
 
 
                     // ========================================
-                    // 計測忘れ
+                    // 記録表示
                     // ========================================
 
                     if (
@@ -729,14 +745,7 @@ function displayRecords(
 
                       `;
 
-                    }
-
-
-                    // ========================================
-                    // 通常記録
-                    // ========================================
-
-                    else {
+                    } else {
 
                       div.innerHTML = `
 
@@ -1582,7 +1591,7 @@ function saveToGAS(
 
 
 // ========================================
-// 通常の記録
+// 通常の記録・過去の記録の保存
 // ========================================
 
 function saveMeasurement() {
@@ -1664,6 +1673,10 @@ function saveMeasurement() {
       }
 
 
+      // ========================================
+      // メッセージ
+      // ========================================
+
       if (
         editingDate
       ) {
@@ -1686,13 +1699,17 @@ function saveMeasurement() {
       }
 
 
+      // ========================================
       // 編集モード解除
+      // ========================================
 
       editingDate =
         null;
 
 
+      // ========================================
       // 入力欄をクリア
+      // ========================================
 
       document.getElementById(
         "weight"
@@ -1706,6 +1723,10 @@ function saveMeasurement() {
         "bodyFat"
       ).value = "";
 
+
+      // ========================================
+      // 記録一覧を再読み込み
+      // ========================================
 
       loadRecords();
 
@@ -1748,4 +1769,3 @@ setupDateSelectors();
 displayTodayDate();
 
 loadRecords();
-```
